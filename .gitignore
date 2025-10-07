@@ -1,2 +1,4 @@
 .DS_Store # macOS system file
 Thumbs.db # Windows system file
+
+result/ # Directory for build results
