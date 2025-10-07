@@ -35,23 +35,28 @@
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
-      devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
+      devShell = system: let 
+        pkgs = nixpkgs.legacyPackages.${system}; 
+        scripts = import ./scripts { lib = nixpkgs.lib; inherit pkgs system; };
+        allScripts = with scripts; [ apply build build-switch clean ] ++ 
+          (if pkgs.stdenv.isDarwin then [ rollback ] else []);
+      in {
         default = with pkgs; mkShell {
-          nativeBuildInputs = with pkgs; [ bashInteractive git ];
+          nativeBuildInputs = with pkgs; [ bashInteractive git ] ++ allScripts;
           shellHook = with pkgs; ''
             export EDITOR=vim
+            echo "Available commands: apply, build, build-switch, clean${if pkgs.stdenv.isDarwin then ", rollback" else ""}"
           '';
         };
       };
-      mkApp = scriptName: system: {
-        type = "app";
-        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
-          #!/usr/bin/env bash
-          PATH=${nixpkgs.legacyPackages.${system}.git}/bin:$PATH
-          echo "Running ${scriptName} for ${system}"
-          exec ${self}/apps/${system}/${scriptName}
-        '')}/bin/${scriptName}";
-      };
+      mkApp = scriptName: system: 
+        let 
+          pkgs = nixpkgs.legacyPackages.${system};
+          scripts = import ./scripts { lib = nixpkgs.lib; inherit pkgs system; };
+        in {
+          type = "app";
+          program = "${scripts.${scriptName}}/bin/${scriptName}";
+        };
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
