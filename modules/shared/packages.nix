@@ -2,7 +2,6 @@
 
 with pkgs; [
   # General packages for development and system management
-  alacritty
   bash-completion
   bat
   btop
@@ -31,7 +30,7 @@ with pkgs; [
   meslo-lgs-nf
 
   # Node.js development tools
-  nodejs_24
+  # nodejs_24
 
   # Text and terminal utilities
   htop
@@ -41,14 +40,11 @@ with pkgs; [
   tree
   tmux
   unzip
-  zsh-powerlevel10k
+  starship
   
   # Development tools
   curl
   gh
-  terraform
-  kubectl
-  awscli2
   lazygit
   fzf
   direnv
@@ -62,4 +58,7 @@ with pkgs; [
   # Python packages
   python3
   virtualenv
+
+  #chat programs
+  discord
 ]

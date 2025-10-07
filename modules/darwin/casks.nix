@@ -2,20 +2,15 @@ _:
 
 [
   # Development Tools
-  "homebrew/cask/docker"
-  "visual-studio-code"
-  "iterm2"
-  "postman"
-  "cursor"
+  "kitty"
 
   # Productivity Tools
   "raycast"
 
   # Browsers
-  "google-chrome"
 
   # Communication Tools - Examples (uncomment as needed)
-  # "discord"
+   "discord"
   # "notion"
   # "slack"
   # "telegram"
