@@ -94,8 +94,7 @@ Your personal configuration managed by Home Manager.
 
 **Key directories:**
 - `shared/` - Base configs always applied (programs.nix, default.nix)
-- `programs/` - Per-app configs in dedicated folders (see `programs/kitty/` example)
-- `modules/` - Reusable modules (hidpi, dotfiles)
+- `programs/` - Per-app configs in dedicated folders
 - `themes/` - Color schemes (Base16) and GTK themes
 - `wm/` - Window manager configs (niri with complete setup)
 

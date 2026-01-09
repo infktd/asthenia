@@ -1,15 +1,26 @@
 name: Home Manager Build Check
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'home/**'
+      - 'flake.nix'
+      - 'flake.lock'
+  pull_request:
+    paths:
+      - 'home/**'
+      - 'flake.nix'
+      - 'flake.lock'
 
 jobs:
   build-home:
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        profile: [default, niri]
+      fail-fast: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,13 +35,18 @@ jobs:
       - name: Setup Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build Home Manager default profile
+      - name: Build Home Manager profile
         run: |
-          nix build .#homeConfigurations.default.activationPackage \
+          nix build .#homeConfigurations.${{ matrix.profile }}.activationPackage \
             --print-build-logs \
             --show-trace
 
       - name: Check derivation info
         if: success()
         run: |
-          nix path-info .#homeConfigurations.default.activationPackage
+          nix path-info .#homeConfigurations.${{ matrix.profile }}.activationPackage
+
+      - name: Security Audit
+        if: success()
+        run: |
+          nix run nixpkgs#nix-audit

@@ -1,10 +1,17 @@
 name: NixOS Build Check
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'system/**'
+      - 'flake.nix'
+      - 'flake.lock'
+  pull_request:
+    paths:
+      - 'system/**'
+      - 'flake.nix'
+      - 'flake.lock'
 
 jobs:
   build-nixos:
@@ -14,7 +21,7 @@ jobs:
         host:
           - arasaka
       fail-fast: false
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,3 +46,8 @@ jobs:
         if: success()
         run: |
           nix path-info .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+
+      - name: Security Audit
+        if: success()
+        run: |
+          nix run nixpkgs#nix-audit
