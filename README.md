@@ -5,38 +5,54 @@ A well-structured, beginner-friendly NixOS configuration using Flakes and Home M
 ## ✨ Features
 
 - **Flake-based**: Modern Nix flakes with shallow git clones for fast updates
+- **Builder Pattern**: Custom `mkHome` and `mkNixos` builders in overlays
 - **Modular Structure**: Easy to add/remove components
 - **Home Manager**: Complete user environment management
-- **Multiple Profiles**: default, hidpi, mutable, and niri variants
+- **Two Configurations**: `default` (shared base) and `niri` (window manager)
 - **Niri Window Manager**: Scrollable-tiling Wayland compositor with full setup
-- **Theming System**: Base16 Helios colors + GTK themes (BeautyLine, Juno-ocean)
+- **Theming System**: Base16 Helios colors + GTK themes
 - **Custom Fonts**: System font management with Nerd Fonts
-- **Well-documented**: Comprehensive guides and examples for beginners
-- **Example Configs**: Kitty terminal config as template for programs/
+- **Multiple Programs**: Firefox, Discord, Obsidian, VSCode, nvf (Neovim), Yazi, Kitty, and more
+- **Well-documented**: Comprehensive guides and examples
 
 ## 🗂️ Project Structure
 
 ```
 .
-├── flake.nix              # Flake entry point
+├── flake.nix              # Flake entry point with builder-based outputs
 ├── lib/                   # Shared library code
-│   ├── default.nix        # Helper functions
-│   ├── overlays.nix       # Package overlays and builders
+│   ├── default.nix        # Helper functions (exe, secretManager, removeNewline)
+│   ├── overlays.nix       # Custom builders (mkHome, mkNixos) and overlays
 │   └── schemas.nix        # Flake schema definitions
 ├── home/                  # Home Manager configuration
-│   ├── modules/           # Custom HM modules (hidpi, dotfiles)
-│   ├── programs/          # Per-application configs (kitty example)
-│   ├── shared/            # Shared configuration (always applied)
-│   ├── themes/            # Color schemes and GTK themes
-│   └── wm/                # Window manager configs (niri)
+│   ├── programs/          # Per-application configs
+│   │   ├── discord/       # Discord (via nixcord)
+│   │   ├── dms/           # DankMaterialShell (quickshell)
+│   │   ├── firefox/       # Firefox browser
+│   │   ├── fuzzle/        # Fuzzle launcher
+│   │   ├── git/           # Git configuration
+│   │   ├── kitty/         # Kitty terminal
+│   │   ├── nvf/           # Neovim (via nvf)
+│   │   ├── obsidian/      # Obsidian notes
+│   │   ├── vscode/        # VS Code editor
+│   │   └── yazi/          # Yazi file manager
+│   ├── scripts/           # Helper scripts
+│   ├── secrets/           # Private data (gitignored)
+│   ├── shared/            # Base configuration (programs, services)
+│   ├── themes/            # Color schemes (Base16 Helios) and GTK themes
+│   └── wm/                # Window manager configs
+│       └── niri/          # Niri configuration with config.kdl
 ├── system/                # NixOS system configuration
 │   ├── configuration.nix  # Base system config
 │   ├── fonts/             # Custom font packages
-│   ├── misc/              # Miscellaneous files (sudo prompts)
-│   └── wm/                # Window manager system-level configs
+│   ├── machine/           # Per-machine configurations
+│   │   └── arasaka/       # Machine-specific setup
+│   ├── misc/              # Miscellaneous (groot.txt sudo prompt)
+│   └── wm/                # Window manager system configs
+│       └── niri.nix       # Niri system integration
 └── outputs/               # Build configurations
-    ├── hm.nix            # Home Manager outputs (default, hidpi, niri variants)
-    └── os.nix            # NixOS outputs
+    ├── hm.nix            # Home Manager outputs (default, niri)
+    └── os.nix            # NixOS outputs (arasaka)
 ```
 
 ## 🚀 Quick Start
@@ -66,24 +82,19 @@ A well-structured, beginner-friendly NixOS configuration using Flakes and Home M
    
    **For Home Manager only:**
    ```bash
-   # Standard desktop
+   # Shared base configuration
    nix build .#homeConfigurations.default.activationPackage
    ./result/activate
    
-   # Niri window manager
-   nix build .#homeConfigurations.niri-default.activationPackage
+   # Niri window manager (includes all programs)
+   nix build .#homeConfigurations.niri.activationPackage
    ./result/activate
-   
-   # HiDPI variants
-   nix build .#homeConfigurations.hidpi.activationPackage
-   # or
-   nix build .#homeConfigurations.niri-hidpi.activationPackage
    ```
    
    **For NixOS system:**
    ```bash
    # Import system/wm/niri.nix in configuration.nix if using niri
-   sudo nixos-rebuild switch --flake .#default
+   sudo nixos-rebuild switch --flake .#arasaka
    ```
 
 ## 📚 Directory Guide
@@ -93,21 +104,26 @@ A well-structured, beginner-friendly NixOS configuration using Flakes and Home M
 Your personal configuration managed by Home Manager.
 
 **Key directories:**
-- `shared/` - Base configs always applied (programs.nix, default.nix)
+- `shared/` - Base configs (programs.nix, services.nix, default.nix)
+  - Imported by all configurations
+  - Contains base packages and settings
 - `programs/` - Per-app configs in dedicated folders
-- `themes/` - Color schemes (Base16) and GTK themes
-- `wm/` - Window manager configs (niri with complete setup)
+  - discord, dms, firefox, fuzzle, git, kitty, nvf, obsidian, vscode, yazi
+  - Each program in its own directory with .nix file
+- `themes/` - Color schemes (Base16 Helios) and GTK themes
+- `wm/niri/` - Complete Niri window manager setup
+  - config.kdl for keybindings and layout
+  - Imports all programs (firefox, kitty, nvf, etc.)
 
-**Difference: `shared/` vs `programs/`:**
-- **shared/** = Base configuration that's always included (git, fish, etc.)
-- **programs/** = Optional configs in dedicated folders with their own README
-- See `home/wm/README.md` for detailed explanation
+**Configuration Architecture:**
+- **default**: Only imports `shared/` (minimal base)
+- **niri**: Imports `shared/` + all programs + niri setup
 
 **Adding a program:**
-1. Create `programs/myapp/` directory
-2. Add `myapp.nix` with configuration
-3. Add `README.md` documenting the program
-4. Import in appropriate profile (shared or wm config)
+1. Create `programs/myapp/myapp.nix`
+2. Add configuration in the file
+3. Import in `wm/niri/default.nix` or `shared/programs.nix`
+4. Rebuild configuration
 
 ### `system/` - System Configuration
 
@@ -121,24 +137,30 @@ NixOS system-wide settings.
 
 ### `lib/` - Shared Code
 
-Helper functions and overlays used across configurations.
+Helper functions and builder pattern implementation.
 
 **Files:**
-- `default.nix` - Utility functions (exe, removeNewline, secretManager)
-- `overlays.nix` - Custom builders (mkHome, mkNixos) and overlay imports
-- `schemas.nix` - Flake schema definitions
+- `default.nix` - Utility functions:
+  - `exe` - Extract executable path from package
+  - `removeNewline` - String manipulation helper
+  - `secretManager.readSecret` - Read secrets from files
+- `overlays.nix` - Custom builders exposed via pkgs.builders:
+  - `mkHome` - Build Home Manager configurations
+  - `mkNixos` - Build NixOS system configurations
+  - Integrates lib extensions and niri overlay
+- `schemas.nix` - Flake schema for custom outputs
 
 ### `outputs/` - Build Definitions
 
-Defines how configurations are built and what outputs are available.
+Defines how configurations are built using the builder pattern.
 
-**Available profiles:**
-- `default` - Standard desktop
-- `hidpi` - HiDPI display support
-- `mutable` - Development with mutable home directory
-- `niri-default` - Niri window manager
-- `niri-hidpi` - Niri + HiDPI
-- `niri-mutable` - Niri + mutable home
+**hm.nix - Home Manager outputs:**
+- `default` - Minimal shared configuration
+- `niri` - Full setup with window manager and all programs
+
+**os.nix - NixOS outputs:**
+- `arasaka` - Current machine configuration
+- Automatically merges all hosts from machine/ directory
 
 ## 🎯 Common Tasks
 
@@ -216,16 +238,18 @@ services.syncthing.enable = true;
 
 ### Home Manager Profiles
 
-- `default` - Standard desktop configuration
-- `hidpi` - For high-DPI displays (2x scaling)
-- `mutable` - Development mode with live-editing dotfiles
-- `niri-default` - Niri window manager with standard scaling
-- `niri-hidpi` - Niri window manager with HiDPI support
-- `niri-mutable` - Niri with mutable home directory for development
+- `default` - Base configuration with shared programs only
+- `niri` - Complete setup with Niri WM and all programs
 
-Build a specific profile:
+Build a profile:
 ```bash
-nix build .#homeConfigurations.hidpi.activationPackage
+# Minimal base
+nix build .#homeConfigurations.default.activationPackage
+
+# Full Niri setup
+nix build .#homeConfigurations.niri.activationPackage
+
+# Then activate
 ./result/activate
 ```
 
@@ -233,24 +257,37 @@ nix build .#homeConfigurations.hidpi.activationPackage
 
 This config includes full support for [Niri](https://github.com/YaLTeR/niri), a scrollable-tiling Wayland compositor.
 
-**Features:**
-- Greetd login manager
-- PipeWire audio
+**Included Programs:**
+- Firefox, Discord (nixcord), Obsidian, VS Code
+- Kitty terminal, Yazi file manager
+- nvf (Neovim configuration framework)
+- Fuzzle launcher, DankMaterialShell
+
+**System Features:**
+- Greetd login manager with niri session
+- PipeWire audio with control utilities
 - Bluetooth support
 - XDG portals for screen sharing
-- Pre-configured keybindings (Mod+T for terminal, Mod+Q for close)
+- Polkit authentication agent
 
 **To use Niri:**
-1. Build the niri home profile: `nix build .#homeConfigurations.niri-default.activationPackage`
-2. Import `system/wm/niri.nix` in your `system/configuration.nix`
-3. Rebuild your system
-4. Log out and select "niri" session in greetd
+1. Build the niri home profile: `nix build .#homeConfigurations.niri.activationPackage && ./result/activate`
+2. Import `system/wm/niri.nix` in your machine's `default.nix`
+3. Rebuild system: `sudo nixos-rebuild switch --flake .#arasaka`
+4. Log out and select "niri" session
 
-See [home/wm/niri/config.kdl](home/wm/niri/config.kdl) for keybindings and customization.
+See [home/wm/niri/config.kdl](home/wm/niri/config.kdl) for keybindings.
+Config split into modular files in [home/wm/niri/config/](home/wm/niri/config/).
 
 ### System Profiles
 
-Create different profiles for different machines by editing `outputs/os.nix`.
+**Current machine:** `arasaka`
+
+Create new machines:
+1. Add directory: `system/machine/<hostname>/`
+2. Add `default.nix` and `hardware-configuration.nix`
+3. Add hostname to `outputs/os.nix` hosts list
+4. Build: `sudo nixos-rebuild switch --flake .#<hostname>`
 
 ## 🛠️ Troubleshooting
 

@@ -44,7 +44,7 @@ programs.git = {
 If you're setting up a new machine, generate the hardware configuration:
 
 ```bash
-sudo nixos-generate-config --show-hardware-config > system/machine/default/hardware-configuration.nix
+sudo nixos-generate-config --show-hardware-config > system/machine/arasaka/hardware-configuration.nix
 ```
 
 **Important:** Review this file and make sure the UUIDs match your actual partitions!
@@ -56,10 +56,14 @@ sudo nixos-generate-config --show-hardware-config > system/machine/default/hardw
 If you just want to set up your user environment:
 
 ```bash
-# Build the configuration
+# Build the base configuration
 nix build .#homeConfigurations.default.activationPackage
 
 # Activate it
+./result/activate
+
+# Or build the full Niri setup
+nix build .#homeConfigurations.niri.activationPackage
 ./result/activate
 ```
 
@@ -68,7 +72,7 @@ nix build .#homeConfigurations.default.activationPackage
 If you're setting up the entire system:
 
 ```bash
-sudo nixos-rebuild switch --flake .#default
+sudo nixos-rebuild switch --flake .#arasaka
 ```
 
 ## Step 4: Add Your First Program
@@ -80,7 +84,7 @@ Let's add a terminal emulator as an example.
    mkdir -p home/programs/alacritty
    ```
 
-2. **Create the config file** `home/programs/alacritty/default.nix`:
+2. **Create the config file** `home/programs/alacritty/alacritty.nix`:
    ```nix
    { pkgs, ... }:
 
@@ -95,13 +99,22 @@ Let's add a terminal emulator as an example.
    }
    ```
 
-3. **Import it in** `home/shared/programs.nix`:
+3. **Import it in** `home/wm/niri/default.nix` (for niri):
+   ```nix
+   imports = [
+     ../../shared
+     ../../programs/alacritty/alacritty.nix
+     # ... other imports
+   ];
+   ```
+   
+   Or in `home/shared/programs.nix` (for base config):
    ```nix
    { pkgs, ... }:
 
    {
      imports = [
-       ../programs/alacritty
+       ../programs/alacritty/alacritty.nix
      ];
 
      programs = {
@@ -112,7 +125,11 @@ Let's add a terminal emulator as an example.
 
 4. **Rebuild:**
    ```bash
+   # For base
    nix build .#homeConfigurations.default.activationPackage
+   # Or for niri
+   nix build .#homeConfigurations.niri.activationPackage
+   
    ./result/activate
    ```
 
@@ -132,7 +149,7 @@ For multiple machines, create separate configurations:
 
 3. **Create** `system/machine/laptop/default.nix`:
    ```nix
-   { config, pkgs, ... }:
+   { config, pkgs, inputs, ... }:
 
    {
      imports = [
@@ -144,13 +161,13 @@ For multiple machines, create separate configurations:
      
      # Laptop-specific settings
      services.tlp.enable = true;  # Power management
-     services.xserver.libinput.enable = true;  # Touchpad
    }
+   ```
    ```
 
 4. **Add to outputs** in `outputs/os.nix`:
    ```nix
-   hosts = [ "default" "laptop" ];
+   hosts = [ "arasaka" "laptop" ];
    ```
 
 5. **Build:**
