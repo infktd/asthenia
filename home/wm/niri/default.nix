@@ -43,6 +43,7 @@ in
     ../../programs/nvf/nvf.nix
     ../../programs/vscode/vscode.nix
     ../../programs/discord/discord.nix
+    ../../programs/obsidian/obsidian.nix
   ];
 
   home = {
