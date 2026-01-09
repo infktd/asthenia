@@ -6,11 +6,14 @@
   
   hardware.nvidia = {
     modesetting.enable = true;
-    powerManagement.enable = false;
+    powerManagement.enable = true;
     powerManagement.finegrained = false;
     open = false; # Use proprietary driver (more stable)
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
+    
+    # Force full composition pipeline for better Wayland performance
+    forceFullCompositionPipeline = true;
   };
 
   # Enable graphics support

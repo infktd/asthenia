@@ -15,7 +15,6 @@ let
 
   audioPkgs = with pkgs; [
     paprefs # pulseaudio preferences
-    pasystray # pulseaudio systray
     pavucontrol # pulseaudio volume control
     playerctl # music player controller
     pulsemixer # pulseaudio mixer
@@ -31,9 +30,12 @@ let
   ] ++ fontPkgs ++ audioPkgs;
 in
 {
-  xdg.configFile."niri/config.kdl".source = ./config.kdl;
-
-  services.polkit-gnome.enable = true;
+  home.pointerCursor = {
+    name = "Adwaita";
+    package = pkgs.adwaita-icon-theme;
+    size = 24;
+    gtk.enable = true;
+  };
 
   imports = [
     ../../shared
@@ -57,15 +59,34 @@ in
       SHELL = "${lib.exe pkgs.fish}";
       MOZ_ENABLE_WAYLAND = 1;
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
+      # NVIDIA + Wayland performance
+      __GL_GSYNC_ALLOWED = 0;
+      __GL_VRR_ALLOWED = 0;
+      WLR_NO_HARDWARE_CURSORS = 1;
+      LIBVA_DRIVER_NAME = "nvidia";
+      GBM_BACKEND = "nvidia-drm";
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      # Aggressive performance tuning
+      __GL_YIELD = "NOTHING";
+      __GL_THREADED_OPTIMIZATION = 1;
+      CLUTTER_PAINT = "disable-clipped-redraws:disable-culling";
+      CLUTTER_VBLANK = "none";
     };
   };
 
   fonts.fontconfig.enable = true;
 
+  # Niri configuration
+  xdg.configFile."niri/config.kdl".source = ./config/config.kdl;
+
   # e.g. for slack, etc
   xdg.configFile."electron-flags.conf".text = ''
-    --enable-features=UseOzonePlatform
+    --enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder
     --ozone-platform=wayland
+    --enable-gpu-rasterization
+    --enable-zero-copy
+    --ignore-gpu-blocklist
+    --disable-gpu-driver-bug-workarounds
   '';
 
   xdg.portal = {

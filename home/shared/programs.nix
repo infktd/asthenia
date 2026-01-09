@@ -1,6 +1,10 @@
 { pkgs, config, lib, ... }:
 
 {
+  imports = [
+    ../programs/git/git.nix
+  ];
+
   programs = {
     # Terminal file manager with vim keybindings
     bat.enable = true;
