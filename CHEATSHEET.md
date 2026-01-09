@@ -6,29 +6,34 @@ Quick reference for common operations with this configuration.
 
 ### Home Manager
 ```bash
-# Build configuration
+# Build base configuration
 nix build .#homeConfigurations.default.activationPackage
+
+# Build niri configuration
+nix build .#homeConfigurations.niri.activationPackage
 
 # Activate (apply changes)
 ./result/activate
 
 # Build and activate in one step
 home-manager switch --flake .#default
+# or
+home-manager switch --flake .#niri
 ```
 
 ### NixOS System
 ```bash
 # Build and switch
-sudo nixos-rebuild switch --flake .#default
+sudo nixos-rebuild switch --flake .#arasaka
 
 # Build and test (doesn't set as default)
-sudo nixos-rebuild test --flake .#default
+sudo nixos-rebuild test --flake .#arasaka
 
 # Build without applying
-sudo nixos-rebuild build --flake .#default
+sudo nixos-rebuild build --flake .#arasaka
 
 # Build for a specific machine
-sudo nixos-rebuild switch --flake .#mymachine
+sudo nixos-rebuild switch --flake .#<hostname>
 ```
 
 ## 🔄 Update & Maintenance
@@ -96,9 +101,10 @@ nix eval nixpkgs#<package-name>.meta.description
 ## 📁 File Structure Quick Guide
 
 ### Adding a Program
-1. Create `home/programs/myapp/default.nix`
-2. Edit `home/shared/programs.nix` to import it
-3. Rebuild Home Manager
+1. Create `home/programs/myapp/myapp.nix`
+2. Add configuration
+3. Import in `home/wm/niri/default.nix` (for niri) or `home/shared/programs.nix` (for all)
+4. Rebuild Home Manager
 
 ### Adding a System Package
 1. Edit `system/configuration.nix`
@@ -111,11 +117,11 @@ nix eval nixpkgs#<package-name>.meta.description
 3. Rebuild Home Manager
 
 ### Creating a New Machine
-1. `mkdir -p system/machine/mymachine`
-2. Generate hardware config: `nixos-generate-config --show-hardware-config > system/machine/mymachine/hardware-configuration.nix`
-3. Create `system/machine/mymachine/default.nix`
-4. Add to `outputs/os.nix` hosts list
-5. Build: `sudo nixos-rebuild switch --flake .#mymachine`
+1. `mkdir -p system/machine/<hostname>`
+2. Generate hardware config: `nixos-generate-config --show-hardware-config > system/machine/<hostname>/hardware-configuration.nix`
+3. Create `system/machine/<hostname>/default.nix`
+4. Add to `outputs/os.nix` hosts list: `hosts = [ "arasaka" "<hostname>" ];`
+5. Build: `sudo nixos-rebuild switch --flake .#<hostname>`
 
 ## 🔐 Secrets Management
 
@@ -134,13 +140,12 @@ git status  # Should not show secrets/
 ## 🎯 Configuration Profiles
 
 ### Home Manager Profiles
-- `default` - Standard configuration
-- `hidpi` - HiDPI displays
-- `mutable` - Development with live-editing
+- `default` - Minimal base configuration
+- `niri` - Full Niri WM with all programs
 
 ```bash
 # Use a specific profile
-nix build .#homeConfigurations.hidpi.activationPackage
+nix build .#homeConfigurations.niri.activationPackage
 ./result/activate
 ```
 
@@ -151,13 +156,13 @@ nix build .#homeConfigurations.hidpi.activationPackage
 nix flake check
 
 # Dry run (show what would change)
-nixos-rebuild dry-build --flake .#default
+nixos-rebuild dry-build --flake .#arasaka
 
 # Test without making default
-nixos-rebuild test --flake .#default
+nixos-rebuild test --flake .#arasaka
 
 # Build in VM (for testing big changes)
-nixos-rebuild build-vm --flake .#default
+nixos-rebuild build-vm --flake .#arasaka
 ./result/bin/run-*-vm
 ```
 
