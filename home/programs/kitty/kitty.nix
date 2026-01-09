@@ -4,7 +4,7 @@
   programs.kitty = {
     enable = true;
     shellIntegration.enableFishIntegration = true;
-    themeFile = "One_Dark";
+    themeFile = "OneDark";
     font = {
       name = "JetBrainsMono Nerd Font";
       size = config.programs.kitty.fontsize or 12;
