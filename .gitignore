@@ -1,0 +1,27 @@
+# Ignore build results
+result
+result-*
+
+# Ignore secrets
+home/secrets/*
+!home/secrets/.gitignore
+!home/secrets/README.md
+
+# Ignore hardware configs (machine-specific)
+# Uncomment if you don't want to version control hardware configs
+# system/machine/*/hardware-configuration.nix
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Direnv
+.direnv/
+.envrc
