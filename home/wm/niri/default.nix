@@ -33,15 +33,6 @@ in
 {
   imports = [
     ../../shared
-    ../../programs/chrome/chrome.nix
-    ../../programs/fuzzle/fuzzle.nix
-    ../../programs/kitty/kitty.nix
-    ../../programs/nvf/nvf.nix
-    ../../programs/vscode/vscode.nix
-    ../../programs/discord/discord.nix
-    ../../programs/obsidian/obsidian.nix
-    ../../programs/yazi/yazi.nix
-
   ];
 
   home.pointerCursor = {
