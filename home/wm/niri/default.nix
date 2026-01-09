@@ -39,7 +39,7 @@ in
 
   imports = [
     ../../shared
-    ../../programs/firefox/firefox.nix
+    ../../programs/chrome/chrome.nix
     ../../programs/fuzzle/fuzzle.nix
     ../../programs/kitty/kitty.nix
     ../../programs/nvf/nvf.nix
@@ -47,7 +47,7 @@ in
     ../../programs/discord/discord.nix
     ../../programs/obsidian/obsidian.nix
     ../../programs/yazi/yazi.nix
-    ../../programs/dms/dms.nix
+
   ];
 
   home = {
