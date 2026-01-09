@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         host:
-          - default
+          - arasaka
       fail-fast: false
     
     steps:
