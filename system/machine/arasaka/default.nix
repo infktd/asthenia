@@ -8,7 +8,8 @@
 
   # Import hardware configuration
   imports = [ 
-    ./hardware-configuration.nix 
+    ./hardware-configuration.nix
+    ./nvidia.nix
     ../../wm/niri.nix
   ];
 

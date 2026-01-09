@@ -22,6 +22,16 @@
     };
   };
 
+  # XDG Desktop Portal for file pickers and other desktop integrations
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-gnome
+    ];
+    config.common.default = [ "gtk" ];
+  };
+
   # TTY service config for login
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
