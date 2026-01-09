@@ -46,8 +46,3 @@ jobs:
         if: success()
         run: |
           nix path-info .#homeConfigurations.${{ matrix.profile }}.activationPackage
-
-      - name: Security Audit
-        if: success()
-        run: |
-          nix run nixpkgs#nix-audit

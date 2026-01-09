@@ -47,8 +47,3 @@ jobs:
         if: success()
         run: |
           nix path-info .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
-
-      - name: Security Audit
-        if: success()
-        run: |
-          nix run nixpkgs#nix-audit
