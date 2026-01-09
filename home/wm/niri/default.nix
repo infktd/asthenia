@@ -45,6 +45,7 @@ in
     ../../programs/discord/discord.nix
     ../../programs/obsidian/obsidian.nix
     ../../programs/yazi/yazi.nix
+    ../../programs/dms/dms.nix
   ];
 
   home = {
