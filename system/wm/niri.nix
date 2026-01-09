@@ -1,6 +1,22 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, inputs, ... }:
 
 {
+  imports = [
+    inputs.dms.nixosModules.dank-material-shell
+    inputs.dms.nixosModules.niri
+  ];
+
+  programs.dankMaterialShell = {
+    enable = true;
+    niri = {
+      enableKeybinds = false;
+      enableSpawn = true;
+    };
+    default.settings = {
+      theme = "dark";
+      dynamicTheming = true;
+    };
+  };
   environment.systemPackages = with pkgs; [
     wl-clipboard
     wayland-utils

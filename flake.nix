@@ -38,6 +38,11 @@
     nixcord = {
       url = "github:kaylorben/nixcord";
     };
+
+    # dankmaterialshell (quickshell)
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell";
+    };
   };
 
   outputs = inputs @ { self, nixpkgs, home-manager, flake-schemas, ... }:
