@@ -76,20 +76,20 @@ input {
 // https://yalter.github.io/niri/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
 
-// Primary monitor (left)
+// Primary monitor (top)
 output "DP-1" {
     mode "2560x1440@144.002"
     scale 1
     transform "normal"
-    position x=0 y=0
+    position x=0 y=1440
 }
 
-// Secondary monitor (right)
+// Secondary monitor (bottom)
 output "DP-2" {
     mode "2560x1440@144.002"
     scale 1
     transform "normal"
-    position x=2560 y=0
+    position x=0 y=0
 }
 
 // Settings that influence how windows are positioned and sized.
