@@ -7,7 +7,10 @@
   networking.hostName = "arasaka"; # Change this to your hostname
 
   # Import hardware configuration
-  imports = [ ./hardware-configuration.nix ];
+  imports = [ 
+    ./hardware-configuration.nix 
+    ../../wm/niri.nix
+  ];
 
   # Machine-specific overrides
   # services.xserver.enable = true;
