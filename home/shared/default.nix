@@ -1,15 +1,14 @@
-{ pkgs, lib, vars, ... }:
+{ pkgs, lib, ... }:
 
 let
-  username = vars.user.username;
-  homeDirectory = vars.user.homeDirectory;
+  username = "infktd";
+  homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
   
   # Custom scripts
   scripts = pkgs.callPackage ../scripts { };
 
-  # Base packages
-  basePackages = with pkgs; [
+  packages = with pkgs; [
     # Generic Applications
     bottom      # System monitor (btm)
     dust        # Disk usage analyzer
@@ -17,6 +16,8 @@ let
     fd          # Modern find replacement
     ripgrep     # Fast grep alternative
     tree        # Directory tree viewer
+    signal-desktop
+    vlc
     yubioath-flutter
 
     # User Shell packages
@@ -28,25 +29,11 @@ let
     
     # Development tools
     git
+
+    # Languages
+    python3
+    nodejs
   ] ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
-  
-  # Development language packages
-  devLanguages = with pkgs; lib.optionals vars.development.enable (
-    lib.optional vars.development.languages.python python3 ++
-    lib.optional vars.development.languages.nodejs nodejs ++
-    lib.optional vars.development.languages.rust cargo ++
-    lib.optional vars.development.languages.go go ++
-    lib.optional vars.development.languages.java jdk
-  );
-  
-  # Application packages
-  appPackages = with pkgs; 
-    lib.optional vars.applications.communication.signal signal-desktop ++
-    lib.optional vars.applications.media.vlc vlc ++
-    lib.optional vars.applications.media.mpv mpv ++
-    lib.optional vars.applications.media.spotify spotify;
-  
-  packages = basePackages ++ devLanguages ++ appPackages;
 in
 {
   programs.home-manager.enable = true;

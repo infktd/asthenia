@@ -1,4 +1,4 @@
-{ pkgs, config, lib, vars, ... }:
+{ pkgs, config, lib, ... }:
 
 {
   imports = [
@@ -19,8 +19,8 @@
 
     # Directory navigation
     direnv = {
-      enable = vars.development.enable;
-      nix-direnv.enable = vars.development.enable;
+      enable = true;
+      nix-direnv.enable = true;
     };
 
     # Fuzzy finder

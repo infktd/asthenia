@@ -47,33 +47,30 @@
 
   outputs = inputs @ { self, nixpkgs, home-manager, flake-schemas, ... }:
     let
-      # Import user-configurable variables
-      vars = import ./variables.nix;
-      
-      system = vars.system.architecture;
+      system = "x86_64-linux";
 
       # Import overlays from lib/
-      overlays = import ./lib/overlays.nix { inherit inputs system vars; };
+      overlays = import ./lib/overlays.nix { inherit inputs system; };
 
       # Configure pkgs with overlays
       pkgs = import nixpkgs {
         inherit overlays system;
         config = {
-          allowUnfree = vars.advanced.allowUnfree;
+          allowUnfree = true;
         };
       };
     in
     {
       # Home Manager configurations
       # Build with: nix build .#homeConfigurations.<name>.activationPackage
-      homeConfigurations = pkgs.builders.mkHome { inherit vars; };
+      homeConfigurations = pkgs.builders.mkHome { };
 
       # NixOS system configurations
       # Build with: sudo nixos-rebuild switch --flake .#<hostname>
-      nixosConfigurations = pkgs.builders.mkNixos { inherit vars; };
+      nixosConfigurations = pkgs.builders.mkNixos { };
 
-      # Export pkgs, overlays, and variables for external use
-      out = { inherit pkgs overlays vars; };
+      # Export pkgs and overlays for external use
+      out = { inherit pkgs overlays; };
 
       # Flake schemas for documentation
       schemas =

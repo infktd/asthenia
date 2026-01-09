@@ -1,4 +1,4 @@
-{ inputs, system, vars }:
+{ inputs, system }:
 
 let
   # Version overlay for nixos-version to work with flakes
@@ -16,11 +16,11 @@ let
   overlays = f: p: {
     # Builder functions for creating Home Manager and NixOS configurations
     builders = {
-      mkHome = { pkgs ? f, extraHomeConfig ? { }, vars ? {} }:
-        import ../outputs/hm.nix { inherit extraHomeConfig inputs pkgs system vars; };
+      mkHome = { pkgs ? f, extraHomeConfig ? { } }:
+        import ../outputs/hm.nix { inherit extraHomeConfig inputs pkgs system; };
 
-      mkNixos = { pkgs ? f, extraSystemConfig ? { }, vars ? {} }:
-        import ../outputs/os.nix { inherit extraSystemConfig inputs pkgs system vars; };
+      mkNixos = { pkgs ? f, extraSystemConfig ? { } }:
+        import ../outputs/os.nix { inherit extraSystemConfig inputs pkgs system; };
     };
   };
 in

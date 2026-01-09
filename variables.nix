@@ -5,7 +5,7 @@
   # === User Information ===
   user = {
     username = "infktd";
-    fullName = "User";
+    fullName = "infktd";
     email = "user@example.com";
     homeDirectory = "/home/infktd";
   };
