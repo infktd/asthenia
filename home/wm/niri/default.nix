@@ -27,28 +27,20 @@ let
     nemo # file manager
     networkmanagerapplet # network manager systray app
     wl-clipboard # clipboard support
+    xwayland-satellite-unstable # X11 app support for niri
   ] ++ fontPkgs ++ audioPkgs;
 in
 {
+  imports = [
+    ../../shared
+  ];
+
   home.pointerCursor = {
     name = "Adwaita";
     package = pkgs.adwaita-icon-theme;
     size = 24;
     gtk.enable = true;
   };
-
-  imports = [
-    ../../shared
-    ../../programs/chrome/chrome.nix
-    ../../programs/fuzzle/fuzzle.nix
-    ../../programs/kitty/kitty.nix
-    ../../programs/nvf/nvf.nix
-    ../../programs/vscode/vscode.nix
-    ../../programs/discord/discord.nix
-    ../../programs/obsidian/obsidian.nix
-    ../../programs/yazi/yazi.nix
-
-  ];
 
   home = {
     inherit packages;
@@ -76,8 +68,10 @@ in
 
   fonts.fontconfig.enable = true;
 
-  # Niri configuration
-  xdg.configFile."niri/config.kdl".source = ./config/config.kdl;
+  # Use custom config file
+  xdg.configFile."niri/config.kdl" = {
+    source = ./config/config.kdl;
+  };
 
   # e.g. for slack, etc
   xdg.configFile."electron-flags.conf".text = ''

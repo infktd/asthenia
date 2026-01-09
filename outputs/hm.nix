@@ -1,4 +1,4 @@
-{ extraHomeConfig, inputs, system, pkgs, ... }:
+{ extraHomeConfig, inputs, system, pkgs, vars, ... }:
 
 let
   # Base modules for all Home Manager configurations
@@ -12,7 +12,7 @@ let
     inputs.home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       modules = modules' ++ mods;
-      extraSpecialArgs = { inherit inputs; };
+      extraSpecialArgs = { inherit inputs vars; };
     };
 in
 {

@@ -1,11 +1,11 @@
-{ extraSystemConfig, inputs, system, pkgs, ... }:
+{ extraSystemConfig, inputs, system, pkgs, vars, ... }:
 
 let
   inherit (inputs.nixpkgs.lib) nixosSystem;
   inherit (pkgs) lib;
 
   # List of machine hostnames to build configurations for
-  hosts = [ "arasaka" ];
+  hosts = [ vars.system.hostname ];
 
   # Base modules for all NixOS configurations
   modules' = [
@@ -18,7 +18,7 @@ let
   make = host: {
     ${host} = nixosSystem {
       inherit lib pkgs system;
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs vars; };
       modules = modules' ++ [ ../system/machine/${host} ];
     };
   };
