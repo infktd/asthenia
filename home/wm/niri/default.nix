@@ -37,7 +37,14 @@ in
 
   imports = [
     ../../shared
+    ../../programs/firefox
+    ../../programs/fuzzle
     ../../programs/kitty
+    ../../programs/firefox
+    ../../programs/nvf
+    ../../programs/vscode
+    ../../programs/discord
+
   ];
 
   home = {
