@@ -44,6 +44,9 @@ in
     ../../programs/vscode/vscode.nix
     ../../programs/discord/discord.nix
     ../../programs/obsidian/obsidian.nix
+    ../../programs/discord/waybar.nix
+    ../../programs/waypaper/waypaper.nix
+    ../../programs/yazi/yazi.nix
   ];
 
   home = {

@@ -1,0 +1,221 @@
+{
+	"layer": "top",
+	"custom/left-arrow-dark": {
+		"format": "",
+		"tooltip": false
+	},
+	"custom/left-arrow-light": {
+		"format": "",
+		"tooltip": false
+	},
+	"custom/right-arrow-dark": {
+		"format": "",
+		"tooltip": false
+	},
+	"custom/right-arrow-light": {
+		"format": "",
+		"tooltip": false
+	},
+	"niri/workspaces": {
+		"disable-scroll": false,
+    "all-outputs": false,
+		"format": "{icon}",
+    "format-icons": {
+      "web": "",
+      "nix": " ",
+      "dev": " ",
+      "chat": "",
+      "work": "󰐻 ",
+      "mon": " ",
+      "urgent": "",
+      "default": ""
+    }
+	},
+	"clock#1": {
+		"format": "{:%a}",
+		"tooltip": false
+	},
+	"clock#2": {
+		"format": "{:%H:%M}",
+		"tooltip-format": "{:%A}"
+	},
+	"clock#3": {
+		"format": "{:%b %d}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+      "calendar": {
+        "mode": "month",
+        "mode-mon-col": 3,
+        "weeks-pos": "right",
+        "on-scroll": 1,
+        "format": {
+          "months": "<span color='#ffead3'><b>{}</b></span>",
+          "days": "<span color='#ecc6d9'><b>{}</b></span>",
+          "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+          "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+          "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+        }
+      },
+      "actions": {
+        "on-click-right": "mode",
+        "on-click-forward": "tz_up",
+        "on-click-backward": "tz_down",
+        "on-scroll-up": "shift_up",
+        "on-scroll-down": "shift_down"
+      }
+	},
+	"pulseaudio": {
+		"format": "{icon} {volume:2}%",
+		"format-bluetooth": "{icon}  {volume}%",
+		"format-muted": "MUTE",
+		"format-icons": {
+			"headphones": "",
+			"default": [
+				"",
+				""
+			]
+		},
+		"scroll-step": 5,
+		"on-click": "pulsemixer",
+		"on-click-right": "pavucontrol"
+	},
+	"memory": {
+		"interval": 5,
+		"format": "Mem {}%"
+	},
+	"cpu": {
+		"interval": 5,
+		"format": "CPU {usage:2}%",
+		"tooltip": false
+	},
+	"battery": {
+		"states": {
+			"good": 95,
+			"warning": 30,
+			"critical": 15
+		},
+		"format": "{icon} {capacity}%",
+		"format-icons": [
+			"",
+			"",
+			"",
+			"",
+			""
+		]
+	},
+	"disk": {
+		"interval": 5,
+		"format": "Disk {percentage_used:2}%",
+		"path": "/"
+	},
+	"tray": {
+		"icon-size": 20,
+    "show-passive-items": true
+	},
+  "custom/spotify": {
+    "format": "{icon}",
+    "format-icons": [ "󰓇 " ]
+  },
+  "custom/mpris": {
+    "format": "{}",
+    "return-type": "json",
+    "max-length":70,
+    "exec": "playerctl --player=spotify metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{status}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
+    "on-click": "playerctl play-pause"
+  },
+  "group/group-power": {
+    "orientation": "inherit",
+    "drawer": {
+        "transition-duration": 500,
+        "children-class": "not-power",
+        "transition-left-to-right": true
+    },
+    "modules": [
+        "custom/power",
+        "custom/quit",
+        "custom/lock",
+        "custom/reboot"
+    ]
+  },
+  "custom/quit": {
+      "format": "󰗼 ",
+      "tooltip": true,
+      "tooltip-format": "Exit Niri Session",
+      "on-click": "niri msg action quit"
+  },
+  "custom/lock": {
+      "format": "󰍁 ",
+      "tooltip": true,
+      "tooltip-format": "Lock",
+      "on-click": "swaylock-cmd"
+  },
+  "custom/reboot": {
+      "format": "󰜉 ",
+      "tooltip": true,
+      "tooltip-format": "Reboot",
+      "on-click": "reboot"
+  },
+  "custom/power": {
+      "format": "   ",
+      "tooltip": true,
+      "tooltip-format": "Power Off",
+      "on-click": "poweroff"
+  },
+  "network": {
+    "format": "{ifname}",
+    "format-wifi": "{ipaddr}/{cidr} ",
+    "format-ethernet": "{ifname} ",
+    "format-disconnected": "",
+    "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+    "tooltip-format-ethernet": "{ipaddr}/{cidr} 󰊗",
+    "tooltip-format-disconnected": "Disconnected 󰌙",
+    "max-length": 50
+  },
+  "niri/language": {
+    "format": "{}",
+    "format-en": "🇬🇧 English",
+    "format-pl": "🇵🇱 Polish",
+    "format-es": "🇦🇷 Spanish",
+    "on-click": "niri msg action switch-layout next"
+  },
+  "custom/audio_idle_inhibitor": {
+		"format": "{icon}",
+    "tooltip": false,
+		"exec": "sway-audio-idle-inhibit --ignore-source-outputs 'cava,PulseAudio Volume Control' --dry-print-both-waybar",
+		"exec-if": "which sway-audio-idle-inhibit",
+		"return-type": "json",
+		"format-icons": {
+			"output": "",
+			"input": "",
+			"output-input": "  ",
+			"none": " "
+		}
+	},
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+        "activated": "",
+        "deactivated": ""
+    }
+  },
+  "custom/notification": {
+    "tooltip": false,
+    "format": " {icon} ",
+    "format-icons": {
+      "notification": "<span foreground='red'><sup></sup></span>",
+      "none": "",
+      "dnd-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  }
+}
