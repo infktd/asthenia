@@ -47,6 +47,7 @@ in
     ../../programs/discord/waybar.nix
     ../../programs/waypaper/waypaper.nix
     ../../programs/yazi/yazi.nix
+    ../../programs/fish/fish.nix
   ];
 
   home = {
