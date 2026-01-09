@@ -3,17 +3,12 @@
 {
   imports = [
     inputs.dms.homeModules.dank-material-shell
-    inputs.dms.homeModules.niri
   ];
 
-  programs.dankMaterialShell = {
+  programs.dank-material-shell = {
     enable = true;
-    niri = {
-      enableKeybinds = false;   # Sets static preset keybinds
-      enableSpawn = true;       # Auto-start DMS with niri and cliphist, if enabled
-    };
 
-    default.settings = {
+    settings = {
       theme = "dark";
       dynamicTheming = true;
     };
