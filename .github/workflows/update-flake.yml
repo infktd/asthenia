@@ -1,5 +1,5 @@
 name: flake.lock Update
-description: "Updates flake.lock weekly and creates a pull request if there are changes."
+
 
 on:
   schedule:

@@ -1,0 +1,35 @@
+name: "Security Scan (Vulnix)"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  vulnix-scan:
+    name: "Vulnix Scan"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: [default, niri]
+        host : [arasaka]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Install Vulnix
+        run: nix profile install nixpkgs#vulnix
+
+      - name: Scan NixOS Configuration
+        run: |
+          DRV=$(nix path-info --derivation .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel)
+          vulnix $DRV
+
+      - name: Scan Home Manager Configuration
+        run: |
+          DRV=$(nix path-info --derivation .#homeConfigurations.${{ matrix.profile }}.activationPackage)
+          vulnix $DRV
