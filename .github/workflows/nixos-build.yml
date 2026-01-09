@@ -15,6 +15,7 @@ on:
 
 jobs:
   build-nixos:
+    name: build-nixos-${{ matrix.host }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
