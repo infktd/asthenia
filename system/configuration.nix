@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
   customFonts = with (pkgs.nerd-fonts); [
@@ -9,7 +9,18 @@ let
   myfonts = pkgs.callPackage fonts/default.nix { inherit pkgs; };
 in
 {
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+  ];
 
+  # Home Manager integration
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit inputs; };
+    backupFileExtension = "backup";
+    users.infktd = import ../home/wm/niri;
+  };
 
   # Bootloader
   boot.loader = {
