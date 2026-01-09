@@ -19,6 +19,9 @@ let
     signal-desktop
     vlc
     yubioath-flutter
+
+    # User Shell packages
+    xorg.xhost
     
     # File Management
     unzip
