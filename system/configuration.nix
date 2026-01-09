@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, vars, ... }:
 
 let
   customFonts = with (pkgs.nerd-fonts); [
@@ -7,6 +7,15 @@ let
   ];
 
   myfonts = pkgs.callPackage fonts/default.nix { inherit pkgs; };
+  
+  # Import window manager module based on selection
+  wmModule = 
+    if vars.windowManager.selected == "niri" then
+      ../home/wm/niri
+    else if vars.windowManager.selected == "hyprland" then
+      ../home/wm/hyprland
+    else
+      ../home/shared;  # Fallback to shared config without WM
 in
 {
   imports = [
@@ -17,9 +26,9 @@ in
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputs vars; };
     backupFileExtension = "backup";
-    users.infktd = import ../home/wm/niri;
+    users.${vars.user.username} = import wmModule;
   };
 
   # Bootloader
@@ -30,40 +39,41 @@ in
 
   # Networking
   networking = {
-    networkmanager.enable = true;
+    hostName = vars.system.hostname;
+    networkmanager.enable = vars.network.networkManager;
   };
 
   # Timezone and locale
-  time.timeZone = "America/Chicago";  # Change to your timezone
+  time.timeZone = vars.locale.timeZone;
   
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = vars.locale.defaultLocale;
   
   i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
+    LC_ADDRESS = vars.locale.defaultLocale;
+    LC_IDENTIFICATION = vars.locale.defaultLocale;
+    LC_MEASUREMENT = vars.locale.defaultLocale;
+    LC_MONETARY = vars.locale.defaultLocale;
+    LC_NAME = vars.locale.defaultLocale;
+    LC_NUMERIC = vars.locale.defaultLocale;
+    LC_PAPER = vars.locale.defaultLocale;
+    LC_TELEPHONE = vars.locale.defaultLocale;
+    LC_TIME = vars.locale.defaultLocale;
   };
 
   # Audio configuration (PipeWire replaces PulseAudio and ALSA)
   services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
+  security.rtkit.enable = vars.hardware.audio.enable;
   services.pipewire = {
-    enable = true;
+    enable = vars.hardware.audio.enable && vars.hardware.audio.pipewire;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
   };
 
   # User configuration
-  users.users.infktd = {  # CHANGE THIS
+  users.users.${vars.user.username} = {
     isNormalUser = true;
-    description = "infktd";
+    description = vars.user.fullName;
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.bash;
   };
@@ -81,20 +91,12 @@ in
     font-awesome
   ] ++ customFonts;
 
-  security = {
-    # Sudo custom prompt message
-    sudo.configFile = ''
-      Defaults lecture=always
-      Defaults lecture_file=${misc/groot.txt}
-    '';
-  };
-
   # Enable flakes
   nix = {
     package = pkgs.nixVersions.latest;
     
     settings = {
-      experimental-features = [ "nix-command" "flakes" ];
+      experimental-features = if vars.advanced.experimentalFeatures then [ "nix-command" "flakes" ] else [ ];
       auto-optimise-store = true;
       
       # Trusted users for nix commands
@@ -103,9 +105,9 @@ in
 
     # Automatic garbage collection
     gc = {
-      automatic = true;
+      automatic = vars.advanced.autoGarbageCollect;
       dates = "weekly";
-      options = "--delete-older-than 7d";
+      options = "--delete-older-than ${toString vars.advanced.garbageCollectDays}d";
     };
   };
 
