@@ -3,7 +3,7 @@
 {
   imports = [
     inputs.dms.nixosModules.dank-material-shell
-    inputs.dms.nixosModules.niri
+    inputs.niri-flake.nixosModules.niri
   ];
   
   environment.systemPackages = with pkgs; [
