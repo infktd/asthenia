@@ -12,6 +12,7 @@ let
     inputs.home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       modules = modules' ++ mods;
+      extraSpecialArgs = { inherit inputs; };
     };
 in
 {

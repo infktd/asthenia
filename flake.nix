@@ -33,6 +33,11 @@
     nvf = {
       url = "github:notashelf/nvf";
     };
+
+    # nixcord (Discord)
+    nixcord = {
+      url = "github:kaylorben/nixcord";
+    };
   };
 
   outputs = inputs @ { self, nixpkgs, home-manager, flake-schemas, ... }:

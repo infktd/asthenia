@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (config.lib.file) mkOutOfStoreSymlink;
+  inherit (lib.file) mkOutOfStoreSymlink;
 
   nerdFonts = with (pkgs.nerd-fonts); [
     jetbrains-mono
@@ -37,14 +37,12 @@ in
 
   imports = [
     ../../shared
-    ../../programs/firefox
-    ../../programs/fuzzle
-    ../../programs/kitty
-    ../../programs/firefox
-    ../../programs/nvf
-    ../../programs/vscode
-    ../../programs/discord
-
+    ../../programs/firefox/firefox.nix
+    ../../programs/fuzzle/fuzzle.nix
+    ../../programs/kitty/kitty.nix
+    ../../programs/nvf/nvf.nix
+    ../../programs/vscode/vscode.nix
+    ../../programs/discord/discord.nix
   ];
 
   home = {
