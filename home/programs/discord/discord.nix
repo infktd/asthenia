@@ -1,10 +1,8 @@
-{inputs, ... }:
+{ config, pkgs, ... }:
 
 {
-  imports = [inputs.nixcord.homeModules.nixcord];
-
-  programs.nixcord = {
+  programs.discord = {
     enable = true;
-    config = {frameless = true;};
+    
   };
 }

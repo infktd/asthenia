@@ -1,8 +1,16 @@
-{ pkgs, config, lib, ... }:
+{ pkgs, config, lib, vars, ... }:
 
 {
   imports = [
     ../programs/git/git.nix
+    ../programs/kitty/kitty.nix
+    ../programs/vscode/vscode.nix
+    ../programs/nvf/nvf.nix
+    ../programs/chrome/chrome.nix
+    ../programs/discord/discord.nix
+    ../programs/obsidian/obsidian.nix
+    ../programs/yazi/yazi.nix
+    ../programs/fuzzle/fuzzle.nix
   ];
 
   programs = {
@@ -11,8 +19,8 @@
 
     # Directory navigation
     direnv = {
-      enable = true;
-      nix-direnv.enable = true;
+      enable = vars.development.enable;
+      nix-direnv.enable = vars.development.enable;
     };
 
     # Fuzzy finder
