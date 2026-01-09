@@ -4,6 +4,9 @@ let
   username = "infktd";  # CHANGE THIS
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
+  
+  # Custom scripts
+  scripts = pkgs.callPackage ../scripts { };
 
   packages = with pkgs; [
     # Generic Applications
@@ -27,8 +30,7 @@ let
     # Languages
     python3
     nodejs
-
-  ];
+  ] ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
 in
 {
   programs.home-manager.enable = true;
