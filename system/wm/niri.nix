@@ -20,6 +20,17 @@
       enable = true;
       package = pkgs.niri-unstable;
     };
+    dms-shell = {
+      enable = true;
+      systemd = {
+        enable = true;
+        restartIfChanged = true;
+      };
+      enableSystemMonitoring = true;
+      enableClipboard = true;
+      enableDynamicTheming = true;
+      enableAudioWavelength = true;
+    };
   };
 
   # Polkit authentication agent at system level
@@ -42,6 +53,11 @@
       # Disable niri-flake's polkit agent since we're using polkit-gnome
       niri-flake-polkit.enable = false;
     };
+  };
+
+  # Bind DMS to niri session
+  systemd.user.services.dms = {
+    wantedBy = lib.mkForce [ "niri.service" ];
   };
 
   # XDG Desktop Portal for file pickers and other desktop integrations
