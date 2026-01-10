@@ -68,10 +68,12 @@ in
 
   fonts.fontconfig.enable = true;
 
-  # Use custom config file
-  xdg.configFile."niri/config.kdl" = {
-    source = ./config/config.kdl;
-  };
+  # Use modular config files
+  xdg.configFile."niri/config.kdl".source = ./config/config.kdl;
+  xdg.configFile."niri/input.kdl".source = ./config/input.kdl;
+  xdg.configFile."niri/keybindings.kdl".source = ./config/keybindings.kdl;
+  xdg.configFile."niri/outputs.kdl".source = ./config/outputs.kdl;
+  xdg.configFile."niri/layout.kdl".source = ./config/layout.kdl;
 
   # e.g. for slack, etc
   xdg.configFile."electron-flags.conf".text = ''

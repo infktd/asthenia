@@ -4,8 +4,8 @@ binds {
     //  Program Launch & System
     // =========================
     Mod+Return hotkey-overlay-title="Open a Terminal: ghostty" { spawn "ghostty"; }
-    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel -drun"; }
-    Mod+B hotkey-overlay-title="Open a Browser: Chrome" { spawn "chrome"; }
+    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+B hotkey-overlay-title="Open a Browser: Chrome" { spawn "chromium"; }
 
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
