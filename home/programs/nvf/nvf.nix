@@ -15,9 +15,7 @@
   programs.nvf = {
     enable = true;
     settings.vim = {
-      startPlugins = [
-        pkgs.vimPlugins.vim-kitty-navigator
-      ];
+
     };
   };
 }

@@ -7,6 +7,7 @@
       main = {
         font = "JetBrainsMono Nerd Font:size 10";
         icon-theme = "BeautyLine";
+        horizontal-pad = "10";
         layer = "top";
         icons-enabled = "no";
         lines = "5";
