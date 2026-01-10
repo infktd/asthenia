@@ -78,7 +78,13 @@ in
     wget
     git
     curl
+    pcscliteWithPolkit
   ];
+
+  # PCSCD (Smartcard Support)
+  services.pcscd = {
+    enable = true;
+  };
 
   # Making fonts accessible to applications
   fonts.packages = with pkgs; [
