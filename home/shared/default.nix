@@ -16,6 +16,7 @@ let
     fd          # Modern find replacement
     ripgrep     # Fast grep alternative
     tree        # Directory tree viewer
+    bolt-launcher
     signal-desktop
     vlc
     yubioath-flutter
