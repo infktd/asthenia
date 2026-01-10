@@ -28,6 +28,9 @@ in
     efi.canTouchEfiVariables = true;
   };
 
+  # Use the linux-zen kernel
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+
   # Networking
   networking = {
     hostName = "arasaka";
