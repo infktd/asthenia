@@ -1,7 +1,37 @@
-// Modular Niri config
+// =============================================================================
+// NIRI MAIN CONFIGURATION FILE
+// =============================================================================
+// Main entry point for Niri window manager configuration
+// Written in KDL (KDL Document Language) - a human-friendly config format
+//
+// MODULAR STRUCTURE:
+// This file imports modular configuration files for better organization
+// Each aspect of Niri is configured in its own dedicated file
+//
+// CONFIGURATION MODULES:
+// - input.kdl: Mouse, touchpad, keyboard input settings
+// - keybindings.kdl: Keyboard shortcuts and hotkeys
+// - outputs.kdl: Monitor configuration and layout
+// - layout.kdl: Window tiling behavior and rules
+//
+// EDITING:
+// After changes: home-manager switch --flake .#niri
+// Or just: systemctl --user restart niri (if only KDL files changed)
+//
+// DOCUMENTATION:
+// See: https://github.com/YaLTeR/niri/wiki/Configuration:-Overview
+// =============================================================================
 
+// Import input device configuration (mouse, keyboard, touchpad)
 include "input.kdl"
+
+// Import keybinding configuration (all keyboard shortcuts)
 include "keybindings.kdl"
+
+// Import monitor/output configuration (display settings)
 include "outputs.kdl"
+
+// Import window layout configuration (tiling behavior)
 include "layout.kdl"
+
 
