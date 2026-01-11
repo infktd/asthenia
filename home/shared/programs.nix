@@ -11,12 +11,12 @@
     ../programs/obsidian/obsidian.nix
     ../programs/yazi/yazi.nix
     ../programs/fuzzle/fuzzle.nix
-    ../programs/zsh/zsh.nix
   ];
 
   programs = {
     # Terminal file manager with vim keybindings
     bat.enable = true;
+
 
     # Directory navigation
     direnv = {
