@@ -28,8 +28,10 @@ in
     efi.canTouchEfiVariables = true;
   };
 
-  # Use the linux-zen kernel
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+
+  # Kernel parameters
+  boot.kernelParams = [ "processor.max_cstate=1" ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Networking
   networking = {
@@ -68,7 +70,7 @@ in
   users.users.infktd = {
     isNormalUser = true;
     description = "infktd";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
     shell = pkgs.bash;
   };
 
