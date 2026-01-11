@@ -8,19 +8,42 @@ let
 
   myfonts = pkgs.callPackage fonts/default.nix { inherit pkgs; };
 in
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+# This file manages system-wide NixOS settings. User-level configurations
+# are managed separately via standalone Home Manager (home-manager switch).
+#
+# CONFIGURATION PHILOSOPHY:
+# - System level: Core OS, services, hardware, system-wide programs
+# - User level (Home Manager): Dotfiles, user applications, themes
+#
+# For niri/DMS: System provides session infrastructure (login, systemd services),
+# user provides configuration files and appearance settings.
+# =============================================================================
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
+    # Home Manager is managed separately via standalone configuration.
+    # Run: home-manager switch --flake .#niri
+    # (Home Manager nixosModule integration removed to enable full feature set)
   ];
 
-  # Home Manager integration
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
-    backupFileExtension = "backup";
-    users.infktd = import ../home/wm/niri;
-  };
+  # =============================================================================
+  # HOME MANAGER (Standalone)
+  # =============================================================================
+  # Home Manager configurations are managed independently via:
+  #   home-manager switch --flake .#niri
+  #
+  # This separation provides:
+  # - Full access to all Home Manager options
+  # - Independent user config updates (no sudo required)
+  # - Per-user customization
+  #
+  # Home Manager configs located at:
+  #   home/wm/niri/        - Niri window manager user config
+  #   home/shared/         - Shared user config (all profiles)
+  #   home/programs/       - Individual program configurations
+  # =============================================================================
 
   # Bootloader
   boot.loader = {
