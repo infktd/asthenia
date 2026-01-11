@@ -3,7 +3,7 @@
 {
   imports = [
     ../programs/git/git.nix
-    ../programs/ghostty/ghostty.nix
+    ../programs/alacritty/alacritty.nix
     ../programs/vscode/vscode.nix
     ../programs/nvf/nvf.nix
     ../programs/chrome/chrome.nix
@@ -11,6 +11,7 @@
     ../programs/obsidian/obsidian.nix
     ../programs/yazi/yazi.nix
     ../programs/fuzzle/fuzzle.nix
+    ../programs/zsh/zsh.nix
   ];
 
   programs = {

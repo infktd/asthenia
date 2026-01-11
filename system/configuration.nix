@@ -71,7 +71,7 @@ in
     isNormalUser = true;
     description = "infktd";
     extraGroups = [ "networkmanager" "wheel" "video" "render" ];
-    shell = pkgs.bash;
+    shell = pkgs.zsh;
   };
 
   # System packages
