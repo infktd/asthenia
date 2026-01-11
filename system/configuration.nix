@@ -104,6 +104,7 @@ in
     git
     curl
     pcscliteWithPolkit
+    home-manager  # Required for standalone Home Manager usage
   ];
 
   # Enable zsh system-wide
