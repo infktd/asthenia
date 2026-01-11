@@ -1,355 +1,487 @@
-# NixOS Configuration
+# Asthenia - NixOS Configuration
 
-A well-structured, beginner-friendly NixOS configuration using Flakes and Home Manager. This configuration is modeled after [gvolpe/nix-config](https://github.com/gvolpe/nix-config) with a focus on clarity and ease of management.
+A modern, modular NixOS configuration featuring the Niri window manager, comprehensive Home Manager integration, and a well-organized flake-based setup.
 
-## ✨ Features
+## 📋 Table of Contents
 
-- **Flake-based**: Modern Nix flakes with shallow git clones for fast updates
-- **Builder Pattern**: Custom `mkHome` and `mkNixos` builders in overlays
-- **Modular Structure**: Easy to add/remove components
-- **Home Manager**: Complete user environment management
-- **Two Configurations**: `default` (shared base) and `niri` (window manager)
-- **Niri Window Manager**: Scrollable-tiling Wayland compositor with full setup
-- **Theming System**: Base16 Helios colors + GTK themes
-- **Custom Fonts**: System font management with Nerd Fonts
-- **Multiple Programs**: Firefox, Discord, Obsidian, VSCode, nvf (Neovim), Yazi, Kitty, and more
-- **Well-documented**: Comprehensive guides and examples
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [Configuration Structure](#configuration-structure)
+- [Usage](#usage)
+- [Testing Strategy](#testing-strategy)
+- [Customization](#customization)
+- [Troubleshooting](#troubleshooting)
 
-## 🗂️ Project Structure
+## 🌟 Overview
+
+This configuration implements a complete NixOS system with:
+
+- **Window Manager**: Niri (Wayland compositor with scrollable tiling)
+- **Desktop Environment**: DMS (Dank Material Shell) for system monitoring and widgets
+- **Configuration Management**: Flake-based with Home Manager integration
+- **Hardware Support**: NVIDIA GPU optimization for Wayland
+- **Development Tools**: Full development environment with Neovim (nvf), Git, VSCode
+
+### Key Features
+
+- 🎯 **Modular Design**: Cleanly separated system and user configurations
+- 🔄 **Standalone Home Manager**: User configs independent from system rebuilds
+- 🎨 **Comprehensive Theming**: GTK themes, fonts, and consistent styling
+- ⚡ **Performance Optimized**: NVIDIA Wayland tuning and aggressive performance settings
+- 🛠️ **Developer Friendly**: Rich development tooling and language support
+- 📦 **Reproducible**: Flake-based for consistent, reproducible builds
+
+## 🏗️ Architecture
+
+### Configuration Philosophy
+
+The configuration follows a **dual-layer architecture**:
 
 ```
-.
-├── flake.nix              # Flake entry point with builder-based outputs
-├── lib/                   # Shared library code
-│   ├── default.nix        # Helper functions (exe, secretManager, removeNewline)
-│   ├── overlays.nix       # Custom builders (mkHome, mkNixos) and overlays
-│   └── schemas.nix        # Flake schema definitions
-├── home/                  # Home Manager configuration
-│   ├── programs/          # Per-application configs
-│   │   ├── discord/       # Discord (via nixcord)
-│   │   ├── dms/           # DankMaterialShell (quickshell)
-│   │   ├── firefox/       # Firefox browser
-│   │   ├── fuzzle/        # Fuzzle launcher
-│   │   ├── git/           # Git configuration
-│   │   ├── kitty/         # Kitty terminal
-│   │   ├── nvf/           # Neovim (via nvf)
-│   │   ├── obsidian/      # Obsidian notes
-│   │   ├── vscode/        # VS Code editor
-│   │   └── yazi/          # Yazi file manager
-│   ├── scripts/           # Helper scripts
-│   ├── secrets/           # Private data (gitignored)
-│   ├── shared/            # Base configuration (programs, services)
-│   ├── themes/            # Color schemes (Base16 Helios) and GTK themes
-│   └── wm/                # Window manager configs
-│       └── niri/          # Niri configuration with config.kdl
-├── system/                # NixOS system configuration
-│   ├── configuration.nix  # Base system config
-│   ├── fonts/             # Custom font packages
-│   ├── machine/           # Per-machine configurations
-│   │   └── arasaka/       # Machine-specific setup
-│   ├── misc/              # Miscellaneous (groot.txt sudo prompt)
-│   └── wm/                # Window manager system configs
-│       └── niri.nix       # Niri system integration
-└── outputs/               # Build configurations
-    ├── hm.nix            # Home Manager outputs (default, niri)
-    └── os.nix            # NixOS outputs (arasaka)
+┌─────────────────────────────────────────────────────┐
+│                   SYSTEM LAYER                      │
+│  (NixOS - Root-level, requires sudo)               │
+│                                                      │
+│  • Core OS configuration                            │
+│  • Hardware drivers (NVIDIA)                        │
+│  • System services (greetd, polkit)                 │
+│  • Window manager infrastructure                    │
+│                                                      │
+│  Apply: sudo nixos-rebuild switch --flake .#arasaka │
+└─────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────┐
+│                   USER LAYER                        │
+│  (Home Manager - User-level, no sudo)              │
+│                                                      │
+│  • Dotfiles and configurations                      │
+│  • User applications                                │
+│  • Themes and appearance                            │
+│  • Development environments                         │
+│                                                      │
+│  Apply: home-manager switch --flake .#niri          │
+└─────────────────────────────────────────────────────┘
 ```
+
+### Why Standalone Home Manager?
+
+This configuration uses **standalone Home Manager** (not the NixOS module) for several advantages:
+
+1. **Full Feature Access**: Access to all Home Manager options without limitations
+2. **Independent Updates**: Update user configs without system rebuilds (no sudo)
+3. **Per-User Customization**: Different users can have different configs
+4. **Faster Iteration**: Quick config changes for development and testing
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- NixOS installed (or nix with flakes enabled)
-- Basic understanding of Nix
+- NixOS installed with flakes enabled
+- Git installed
+- Internet connection for downloading dependencies
 
 ### Initial Setup
 
-1. **Clone this repository:**
+1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url> ~/.config/nix-config
-   cd ~/.config/nix-config
+   git clone <your-repo> ~/Projects/acidBurn
+   cd ~/Projects/acidBurn
    ```
 
-2. **Customize your configuration:**
-   - Edit `home/shared/default.nix` and change `username`
-   - Edit `system/configuration.nix` and change `hostName` and user settings
-   - Generate hardware config:
-     ```bash
-     nixos-generate-config --show-hardware-config > system/machine/default/hardware-configuration.nix
-     ```
-
-3. **Build and activate:**
-   
-   **For Home Manager only:**
+2. **Install system configuration**:
    ```bash
-   # Shared base configuration
-   nix build .#homeConfigurations.default.activationPackage
-   ./result/activate
-   
-   # Niri window manager (includes all programs)
-   nix build .#homeConfigurations.niri.activationPackage
-   ./result/activate
-   ```
-   
-   **For NixOS system:**
-   ```bash
-   # Import system/wm/niri.nix in configuration.nix if using niri
    sudo nixos-rebuild switch --flake .#arasaka
    ```
 
-## 📚 Directory Guide
+3. **Install Home Manager** (if not already installed):
+   ```bash
+   nix profile install nixpkgs#home-manager
+   ```
 
-### `home/` - User Environment
+4. **Apply user configuration**:
+   ```bash
+   home-manager switch --flake .#niri
+   ```
 
-Your personal configuration managed by Home Manager.
+5. **Reboot** to start the Niri session:
+   ```bash
+   systemctl reboot
+   ```
 
-**Key directories:**
-- `shared/` - Base configs (programs.nix, services.nix, default.nix)
-  - Imported by all configurations
-  - Contains base packages and settings
-- `programs/` - Per-app configs in dedicated folders
-  - discord, dms, firefox, fuzzle, git, kitty, nvf, obsidian, vscode, yazi
-  - Each program in its own directory with .nix file
-- `themes/` - Color schemes (Base16 Helios) and GTK themes
-- `wm/niri/` - Complete Niri window manager setup
-  - config.kdl for keybindings and layout
-  - Imports all programs (firefox, kitty, nvf, etc.)
+### Using the Asthenia Helper Script
 
-**Configuration Architecture:**
-- **default**: Only imports `shared/` (minimal base)
-- **niri**: Imports `shared/` + all programs + niri setup
-
-**Adding a program:**
-1. Create `programs/myapp/myapp.nix`
-2. Add configuration in the file
-3. Import in `wm/niri/default.nix` or `shared/programs.nix`
-4. Rebuild configuration
-
-### `system/` - System Configuration
-
-NixOS system-wide settings.
-
-**Key files:**
-- `configuration.nix` - Global system config (with fonts and sudo prompt)
-- `fonts/default.nix` - Custom font packages
-- `misc/` - Miscellaneous files (groot.txt sudo prompt)
-- `wm/` - Window manager system configs (niri.nix)
-
-### `lib/` - Shared Code
-
-Helper functions and builder pattern implementation.
-
-**Files:**
-- `default.nix` - Utility functions:
-  - `exe` - Extract executable path from package
-  - `removeNewline` - String manipulation helper
-  - `secretManager.readSecret` - Read secrets from files
-- `overlays.nix` - Custom builders exposed via pkgs.builders:
-  - `mkHome` - Build Home Manager configurations
-  - `mkNixos` - Build NixOS system configurations
-  - Integrates lib extensions and niri overlay
-- `schemas.nix` - Flake schema for custom outputs
-
-### `outputs/` - Build Definitions
-
-Defines how configurations are built using the builder pattern.
-
-**hm.nix - Home Manager outputs:**
-- `default` - Minimal shared configuration
-- `niri` - Full setup with window manager and all programs
-
-**os.nix - NixOS outputs:**
-- `arasaka` - Current machine configuration
-- Automatically merges all hosts from machine/ directory
-
-## 🎯 Common Tasks
-
-### Update System
+The configuration includes a convenient helper script `asthenia` for managing rebuilds:
 
 ```bash
-# Update flake inputs
+# Switch NixOS only
+asthenia --switch nixos
+
+# Switch Home Manager (auto-detects current profile)
+asthenia --switch hm
+
+# Switch Home Manager to specific profile
+asthenia --switch hm niri
+
+# Switch both system and user configs
+asthenia --switch all
+
+# Update flake inputs before switching
+asthenia --update --switch all
+
+# Show help
+asthenia --help
+```
+
+## 📁 Configuration Structure
+
+```
+.
+├── flake.nix                    # Main flake entry point
+├── lib/                         # Shared libraries and utilities
+│   ├── default.nix              # Custom library functions
+│   ├── overlays.nix             # Nixpkgs overlays and builder functions
+│   └── schemas.nix              # Flake schema definitions
+├── outputs/                     # Flake output builders
+│   ├── hm.nix                   # Home Manager configuration builder
+│   └── os.nix                   # NixOS configuration builder
+├── system/                      # System-level NixOS configuration
+│   ├── configuration.nix        # Base system configuration
+│   ├── fonts/                   # System-wide font packages
+│   ├── machine/                 # Machine-specific configs
+│   │   └── arasaka/             # Per-machine customization
+│   │       ├── default.nix      # Machine imports
+│   │       ├── hardware-configuration.nix  # Hardware config
+│   │       └── nvidia.nix       # NVIDIA driver settings
+│   └── wm/                      # Window manager system integration
+│       └── niri.nix             # Niri system services and infrastructure
+└── home/                        # User-level Home Manager configuration
+    ├── shared/                  # Shared user config (all profiles)
+    │   ├── default.nix          # Base user configuration
+    │   ├── programs.nix         # Program imports
+    │   └── services.nix         # User services
+    ├── programs/                # Individual program configurations
+    │   ├── alacritty/           # Terminal emulator
+    │   ├── chrome/              # Chrome browser
+    │   ├── discord/             # Discord client (nixcord)
+    │   ├── dms/                 # DMS user configuration
+    │   ├── fuzzle/              # Fuzzle app
+    │   ├── git/                 # Git configuration
+    │   ├── nvf/                 # Neovim configuration (nvf)
+    │   ├── obsidian/            # Obsidian notes
+    │   ├── vscode/              # VS Code
+    │   ├── yazi/                # File manager
+    │   └── zsh/                 # Shell configuration
+    ├── scripts/                 # Custom user scripts
+    │   ├── default.nix          # Script package definitions
+    │   └── asthenia.nix         # Rebuild helper script
+    ├── themes/                  # Theming configuration
+    │   ├── default.nix          # GTK themes and icons
+    │   └── colors.nix           # Color schemes
+    └── wm/                      # Window manager user configuration
+        └── niri/                # Niri user settings
+            ├── default.nix      # User-level niri config
+            └── config/          # Niri KDL configuration files
+                ├── config.kdl   # Main config (imports others)
+                ├── input.kdl    # Input device configuration
+                ├── keybindings.kdl  # Keyboard shortcuts
+                ├── layout.kdl   # Window layout rules
+                └── outputs.kdl  # Monitor configuration
+```
+
+## 💻 Usage
+
+### System Updates
+
+**Update system configuration only**:
+```bash
+sudo nixos-rebuild switch --flake .#arasaka
+```
+
+**Update user configuration only**:
+```bash
+home-manager switch --flake .#niri
+```
+
+**Update flake inputs**:
+```bash
 nix flake update
-
-# Rebuild with new inputs
-sudo nixos-rebuild switch --flake .#default
 ```
 
-### Add a Package
+### Available Home Manager Profiles
 
-**System-wide:**
-Edit `system/configuration.nix`:
-```nix
-environment.systemPackages = with pkgs; [
-  htop
-  # your package here
-];
-```
+The configuration provides multiple Home Manager profiles:
 
-**User-level:**
-Edit `home/shared/default.nix`:
-```nix
-packages = with pkgs; [
-  firefox
-  # your package here
-];
-```
+1. **`default`**: Basic user configuration without window manager
+   ```bash
+   home-manager switch --flake .#default
+   ```
 
-### Enable a Service
+2. **`niri`**: Full Niri window manager configuration (recommended)
+   ```bash
+   home-manager switch --flake .#niri
+   ```
 
-**System service:**
-```nix
-# In system/configuration.nix
-services.openssh.enable = true;
-```
+### Testing Changes
 
-**User service:**
-```nix
-# In home/shared/services.nix
-services.syncthing.enable = true;
-```
+To test configuration changes without switching:
 
-### Create a Custom Module
-
-**Home Manager module** (`home/modules/mymodule.nix`):
-```nix
-{ config, lib, ... }:
-
-{
-  options.mymodule = {
-    enable = lib.mkEnableOption "my custom module";
-  };
-
-  config = lib.mkIf config.mymodule.enable {
-    # your configuration
-  };
-}
-```
-
-**System module** (`system/modules/mymodule.nix`):
-```nix
-{ config, lib, pkgs, ... }:
-
-{
-  # System-level configuration
-}
-```
-
-## 🔧 Configuration Profiles
-
-### Home Manager Profiles
-
-- `default` - Base configuration with shared programs only
-- `niri` - Complete setup with Niri WM and all programs
-
-Build a profile:
+**Test system config**:
 ```bash
-# Minimal base
-nix build .#homeConfigurations.default.activationPackage
+sudo nixos-rebuild test --flake .#arasaka
+```
 
-# Full Niri setup
+**Build without switching**:
+```bash
+nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
 nix build .#homeConfigurations.niri.activationPackage
-
-# Then activate
-./result/activate
 ```
 
-### Niri Window Manager
+## 🧪 Testing Strategy
 
-This config includes full support for [Niri](https://github.com/YaLTeR/niri), a scrollable-tiling Wayland compositor.
+### How the Agent Tested This Configuration
 
-**Included Programs:**
-- Firefox, Discord (nixcord), Obsidian, VS Code
-- Kitty terminal, Yazi file manager
-- nvf (Neovim configuration framework)
-- Fuzzle launcher, DankMaterialShell
+The original configuration was tested using the following workflow:
 
-**System Features:**
-- Greetd login manager with niri session
-- PipeWire audio with control utilities
-- Bluetooth support
-- XDG portals for screen sharing
-- Polkit authentication agent
+1. **System Build Verification**:
+   ```bash
+   # Verify flake structure
+   nix flake show
+   
+   # Build system configuration without switching
+   nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
+   ```
 
-**To use Niri:**
-1. Build the niri home profile: `nix build .#homeConfigurations.niri.activationPackage && ./result/activate`
-2. Import `system/wm/niri.nix` in your machine's `default.nix`
-3. Rebuild system: `sudo nixos-rebuild switch --flake .#arasaka`
-4. Log out and select "niri" session
+2. **Home Manager Build Verification**:
+   ```bash
+   # Build Home Manager configurations
+   nix build .#homeConfigurations.niri.activationPackage
+   nix build .#homeConfigurations.default.activationPackage
+   ```
 
-See [home/wm/niri/config.kdl](home/wm/niri/config.kdl) for keybindings.
-Config split into modular files in [home/wm/niri/config/](home/wm/niri/config/).
+3. **Live Testing** (in this order):
+   ```bash
+   # Apply system config first
+   sudo nixos-rebuild switch --flake .#arasaka
+   
+   # Install Home Manager CLI
+   nix profile install nixpkgs#home-manager
+   
+   # Apply user config
+   home-manager switch --flake .#niri
+   
+   # Reboot to test complete integration
+   systemctl reboot
+   ```
 
-### System Profiles
+4. **Service Verification**:
+   ```bash
+   # Check systemd services
+   systemctl --user status dms.service
+   systemctl --user status polkit-gnome-authentication-agent-1.service
+   
+   # Verify niri is running
+   pgrep -a niri
+   ```
 
-**Current machine:** `arasaka`
+### Testing After Changes
 
-Create new machines:
-1. Add directory: `system/machine/<hostname>/`
-2. Add `default.nix` and `hardware-configuration.nix`
-3. Add hostname to `outputs/os.nix` hosts list
-4. Build: `sudo nixos-rebuild switch --flake .#<hostname>`
-
-## 🛠️ Troubleshooting
-
-### Configuration doesn't build
+After making changes, follow this testing sequence:
 
 ```bash
-# Check for syntax errors
+# 1. Check flake syntax
 nix flake check
 
-# Build with verbose output
-nix build .#homeConfigurations.default.activationPackage --show-trace
+# 2. Build configs to verify syntax
+nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
+nix build .#homeConfigurations.niri.activationPackage
+
+# 3. Test system changes (doesn't persist after reboot)
+sudo nixos-rebuild test --flake .#arasaka
+
+# 4. If test succeeds, switch permanently
+sudo nixos-rebuild switch --flake .#arasaka
+
+# 5. Apply user changes
+home-manager switch --flake .#niri
 ```
 
-### Need to rollback
+## 🎨 Customization
+
+### Adding a New Machine
+
+1. Create machine directory:
+   ```bash
+   mkdir -p system/machine/new-machine
+   ```
+
+2. Create [`system/machine/new-machine/default.nix`](system/machine/new-machine/default.nix):
+   ```nix
+   { config, lib, pkgs, ... }:
+   {
+     networking.hostName = "new-machine";
+     imports = [
+       ./hardware-configuration.nix
+       # Add window manager or other modules as needed
+     ];
+   }
+   ```
+
+3. Generate hardware config:
+   ```bash
+   nixos-generate-config --show-hardware-config > system/machine/new-machine/hardware-configuration.nix
+   ```
+
+4. Add to [`outputs/os.nix`](outputs/os.nix):
+   ```nix
+   hosts = [ "arasaka" "new-machine" ];
+   ```
+
+### Adding New Programs
+
+1. Create program directory:
+   ```bash
+   mkdir -p home/programs/new-program
+   ```
+
+2. Create configuration file:
+   ```nix
+   # home/programs/new-program/new-program.nix
+   { pkgs, ... }:
+   {
+     programs.new-program = {
+       enable = true;
+       # ... configuration
+     };
+   }
+   ```
+
+3. Import in [`home/shared/programs.nix`](home/shared/programs.nix):
+   ```nix
+   imports = [
+     # ... existing imports
+     ../programs/new-program/new-program.nix
+   ];
+   ```
+
+### Customizing Niri
+
+Niri configuration is split into modular KDL files in [`home/wm/niri/config/`](home/wm/niri/config/):
+
+- **`config.kdl`**: Main file that imports all modules
+- **`input.kdl`**: Mouse, touchpad, keyboard input settings
+- **`keybindings.kdl`**: Keyboard shortcuts
+- **`layout.kdl`**: Window layout and behavior rules
+- **`outputs.kdl`**: Monitor configuration
+
+Edit these files directly and run `home-manager switch --flake .#niri` to apply.
+
+### Changing Themes
+
+Edit [`home/themes/default.nix`](home/themes/default.nix) to change:
+- GTK theme
+- Icon theme
+- Cursor theme
+- Font settings
+
+## 🔧 Troubleshooting
+
+### Home Manager Command Not Found
+
+If `home-manager` command is not available:
 
 ```bash
-# NixOS system
-sudo nixos-rebuild switch --rollback
+# Install Home Manager
+nix profile install nixpkgs#home-manager
 
-# Or boot into previous generation from GRUB
+# Or use nix run
+nix run nixpkgs#home-manager -- switch --flake .#niri
 ```
 
-### Secrets not working
+### Flake Outputs Not Showing
 
-- Ensure `home/secrets/` is gitignored
-- Check file permissions (should be 600 or 400)
-- Verify file paths in your configuration
+If `nix flake show` shows "unknown" for homeConfigurations:
 
-## 📖 Learning Resources
+This is expected behavior. The configurations are built lazily. You can still use them:
+
+```bash
+# These work even if show reports "unknown"
+home-manager switch --flake .#niri
+nix build .#homeConfigurations.niri.activationPackage
+```
+
+### NVIDIA Issues on Wayland
+
+If you experience NVIDIA issues:
+
+1. Check driver is loaded:
+   ```bash
+   lsmod | grep nvidia
+   ```
+
+2. Verify environment variables are set:
+   ```bash
+   echo $LIBVA_DRIVER_NAME  # Should be "nvidia"
+   echo $GBM_BACKEND        # Should be "nvidia-drm"
+   ```
+
+3. Check [`system/machine/arasaka/nvidia.nix`](system/machine/arasaka/nvidia.nix) settings
+
+### Niri Not Starting
+
+1. Check greetd service:
+   ```bash
+   systemctl status greetd
+   ```
+
+2. Verify niri-session is available:
+   ```bash
+   which niri-session
+   ```
+
+3. Check session logs:
+   ```bash
+   journalctl --user -u niri -e
+   ```
+
+### DMS Service Issues
+
+1. Check service status:
+   ```bash
+   systemctl --user status dms.service
+   ```
+
+2. Verify service is enabled:
+   ```bash
+   systemctl --user list-unit-files | grep dms
+   ```
+
+3. Restart service:
+   ```bash
+   systemctl --user restart dms.service
+   ```
+
+## 📚 Additional Resources
 
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
-- [Nix Pills](https://nixos.org/guides/nix-pills/)
-- [NixOS Wiki](https://nixos.wiki/)
-- [Original inspiration: gvolpe/nix-config](https://github.com/gvolpe/nix-config)
-
-## 🔐 Security Notes
-
-- **Never commit secrets** - Use `home/secrets/` for sensitive data
-- Keep `home/secrets/` out of version control
-- Consider using `sops-nix` or `age` for encrypted secrets
-- Review firewall settings in `system/configuration.nix`
-
-## 📝 Customization Tips
-
-1. **Start simple** - Begin with the default configuration
-2. **Add incrementally** - Add one program or service at a time
-3. **Test changes** - Use `nixos-rebuild test` before `switch`
-4. **Document changes** - Add comments explaining non-obvious configuration
-5. **Use modules** - Keep related configuration together in modules
+- [Niri Documentation](https://github.com/YaLTeR/niri)
+- [Flakes Guide](https://nixos.wiki/wiki/Flakes)
 
 ## 🤝 Contributing
 
-This is a personal configuration, but feel free to:
-- Use it as a template for your own config
-- Submit issues for clarification
-- Share improvements via pull requests
+When contributing to this configuration:
 
-## 📄 License
+1. Test all changes using the testing strategy above
+2. Document any new features in this README
+3. Add inline comments to complex Nix expressions
+4. Keep system and user layers properly separated
+5. Update the structure diagram if adding new directories
 
-This configuration is provided as-is for educational purposes. Adapt and modify as needed for your own use.
+## 📝 License
 
-## 🙏 Credits
+This configuration is provided as-is for personal use. Feel free to fork and adapt to your needs.
 
-This configuration structure is inspired by [gvolpe/nix-config](https://github.com/gvolpe/nix-config). Check out his repository for more advanced configurations and ideas.
+---
+
+**Note**: This configuration is designed for the `arasaka` machine with specific hardware (NVIDIA GPU). You'll need to adapt hardware-specific settings for your system.
