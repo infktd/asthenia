@@ -1,11 +1,24 @@
 { config, pkgs, lib, ... }:
 
+# =============================================================================
+# ZSH CONFIGURATION (Home Manager)
+# =============================================================================
+# Full-featured Zsh configuration with Home Manager-specific options.
+# These options are NOT available when Home Manager is used as NixOS module.
+#
+# Features enabled:
+# - Autosuggestions (suggest commands as you type)
+# - Syntax highlighting (color-code commands)
+# - Starship prompt (modern, fast cross-shell prompt)
+# - Custom keybindings and navigation
+# =============================================================================
+
 {
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
+    autosuggestion.enable = true;  # Home Manager specific
+    syntaxHighlighting.enable = true;  # Home Manager specific
     
     dotDir = "${config.xdg.configHome}/zsh";
     
