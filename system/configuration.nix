@@ -71,7 +71,7 @@ in
     isNormalUser = true;
     description = "infktd";
     extraGroups = [ "networkmanager" "wheel" "video" "render" ];
-    shell = pkgs.bash;
+    shell = pkgs.zsh;
   };
 
   # System packages
@@ -82,6 +82,9 @@ in
     curl
     pcscliteWithPolkit
   ];
+
+  # Enable zsh system-wide
+  programs.zsh.enable = true;
 
   # PCSCD (Smartcard Support)
   services.pcscd = {
