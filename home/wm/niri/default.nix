@@ -48,7 +48,7 @@ in
 
     sessionVariables = {
       NIXOS_OZONE_WL = 1;
-      SHELL = "${lib.exe pkgs.fish}";
+      SHELL = "${lib.exe pkgs.zsh}";
       MOZ_ENABLE_WAYLAND = 1;
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       # NVIDIA + Wayland performance

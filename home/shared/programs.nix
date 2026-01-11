@@ -3,6 +3,7 @@
 {
   imports = [
     ../programs/git/git.nix
+    ../programs/zsh/zsh.nix
     ../programs/alacritty/alacritty.nix
     ../programs/vscode/vscode.nix
     ../programs/nvf/nvf.nix
