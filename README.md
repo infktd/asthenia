@@ -239,51 +239,6 @@ nix build .#homeConfigurations.niri.activationPackage
 
 ## 🧪 Testing Strategy
 
-### How the Agent Tested This Configuration
-
-The original configuration was tested using the following workflow:
-
-1. **System Build Verification**:
-   ```bash
-   # Verify flake structure
-   nix flake show
-   
-   # Build system configuration without switching
-   nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
-   ```
-
-2. **Home Manager Build Verification**:
-   ```bash
-   # Build Home Manager configurations
-   nix build .#homeConfigurations.niri.activationPackage
-   nix build .#homeConfigurations.default.activationPackage
-   ```
-
-3. **Live Testing** (in this order):
-   ```bash
-   # Apply system config first
-   sudo nixos-rebuild switch --flake .#arasaka
-   
-   # Install Home Manager CLI
-   nix profile install nixpkgs#home-manager
-   
-   # Apply user config
-   home-manager switch --flake .#niri
-   
-   # Reboot to test complete integration
-   systemctl reboot
-   ```
-
-4. **Service Verification**:
-   ```bash
-   # Check systemd services
-   systemctl --user status dms.service
-   systemctl --user status polkit-gnome-authentication-agent-1.service
-   
-   # Verify niri is running
-   pgrep -a niri
-   ```
-
 ### Testing After Changes
 
 After making changes, follow this testing sequence:
