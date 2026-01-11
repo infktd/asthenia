@@ -2,9 +2,9 @@ prefer-no-csd
 layout {
     
     gaps 16
-    center-focused-column "on-overflow"
+    center-focused-column "always"
     always-center-single-column
-    empty-workspace-above-first
+    // empty-workspace-above-first
     default-column-display "tabbed"
     background-color "#003300"
 
@@ -12,6 +12,7 @@ layout {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
+        fixed 1280
     }
 
     default-column-width { proportion 0.5; }
@@ -20,6 +21,7 @@ layout {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
+        fixed 720
     }
 
     focus-ring {
@@ -50,7 +52,7 @@ layout {
         // off
         on
         softness 30
-        spread 15
+        spread 5
         offset x=5 y=5
         draw-behind-window true
         color "#00000070"
