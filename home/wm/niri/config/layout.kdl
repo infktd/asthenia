@@ -2,7 +2,7 @@ prefer-no-csd
 layout {
     
     gaps 16
-    center-focused-column "always"
+    center-focused-column "never"
     always-center-single-column
     // empty-workspace-above-first
     default-column-display "tabbed"
