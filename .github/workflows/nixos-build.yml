@@ -10,6 +10,9 @@ on:
       - 'flake.nix'
       - 'flake.lock'
   pull_request:
+    branches:
+      - main
+      - flake-lock-update
     paths:
       - 'system/**'
       - 'flake.nix'
