@@ -2,7 +2,9 @@ name: NixOS Build Check
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - flake-lock-update
     paths:
       - 'system/**'
       - 'flake.nix'

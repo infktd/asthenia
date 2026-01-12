@@ -2,7 +2,9 @@ name: Home Manager Build Check
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - flake-lock-update
     paths:
       - 'home/**'
       - 'flake.nix'
