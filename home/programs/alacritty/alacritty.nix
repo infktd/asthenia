@@ -111,7 +111,7 @@ in
       window = {
         # Window opacity (0.0 = transparent, 1.0 = opaque)
         # Requires compositor support (works with Niri/Wayland)
-        opacity = 0.95;
+        opacity = 0.75;
         
         # Padding around terminal text
         # Provides breathing room at window edges
