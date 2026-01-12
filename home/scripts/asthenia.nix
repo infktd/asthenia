@@ -3,7 +3,7 @@
 writeShellScriptBin "asthenia" ''
   set -e
 
-  FLAKE_DIR="$HOME/Projects/acidBurn"
+  FLAKE_DIR="$HOME/.config/asthenia"
   HOSTNAME="arasaka"
   
   # Detect current Home Manager profile by checking the current generation

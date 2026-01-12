@@ -77,43 +77,44 @@
       ];
 
       character = {
-        success_symbol = "[➜](bold green)";
-        error_symbol = "[➜](bold red)";
+        success_symbol = "[](bold green)";
+        error_symbol = "[](bold red)";
       };
 
       directory = {
         truncation_length = 3;
         truncate_to_repo = true;
         style = "bold cyan";
+        read_only = " 󰌾";
       };
 
       git_branch = {
-        symbol = " ";
+        symbol = " ";
         style = "bold purple";
       };
 
       git_status = {
         style = "bold yellow";
-        conflicted = "🏳";
+        conflicted = "󰦖 ";
         ahead = "⇡\${count}";
         behind = "⇣\${count}";
         diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
-        untracked = "?";
-        stashed = "$";
-        modified = "!";
-        staged = "+";
-        renamed = "»";
-        deleted = "✘";
+        untracked = "󰓧 ";
+        stashed = "󰋞 ";
+        modified = "󰏫 ";
+        staged = "󰄬 ";
+        renamed = "󰁕 ";
+        deleted = "󰆴 ";
       };
 
       nix_shell = {
-        symbol = " ";
+        symbol = " ";
         format = "via [$symbol$state]($style) ";
         style = "bold blue";
       };
 
       username = {
-        show_always = false;
+        show_always = true;
         format = "[$user]($style) ";
         style_user = "bold yellow";
       };
