@@ -6,6 +6,7 @@ let
   nerdFonts = with (pkgs.nerd-fonts); [
     jetbrains-mono
     iosevka
+    fira-code
   ];
 
   fontPkgs = with pkgs; [
