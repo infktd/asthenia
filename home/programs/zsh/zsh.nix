@@ -58,6 +58,11 @@
       setopt AUTO_PUSHD
       setopt PUSHD_IGNORE_DUPS
       setopt PUSHD_SILENT
+
+      # Auto-launch Zellij unless already inside a Zellij session or in VS Code
+      if [[ -z $ZELLIJ && "$TERM_PROGRAM" != "vscode" ]]; then
+        command -v zellij &> /dev/null && exec zellij
+      fi
     '';
   };
 

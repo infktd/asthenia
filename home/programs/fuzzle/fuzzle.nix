@@ -11,7 +11,7 @@
         layer = "top";
         icons-enabled = "no";
         lines = "5";
-        terminal = lib.exe pkgs.ghostty;
+        terminal = lib.exe pkgs.alacritty;
       };
       colors = {
         # Catppuccin Mocha palette
