@@ -99,16 +99,16 @@
         ahead = "⇡\${count}";
         behind = "⇣\${count}";
         diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
-        untracked = "󰓧 ";
-        stashed = "󰋞 ";
-        modified = "󰏫 ";
-        staged = "󰄬 ";
-        renamed = "󰁕 ";
-        deleted = "󰆴 ";
+        untracked = " 󰓧 ";
+        stashed = " 󰋞 ";
+        modified = " 󰏫 ";
+        staged = " 󰄬 ";
+        renamed = " 󰁕 ";
+        deleted = " 󰆴 ";
       };
 
       nix_shell = {
-        symbol = " ";
+        symbol = "  ";
         format = "via [$symbol$state]($style) ";
         style = "bold blue";
       };

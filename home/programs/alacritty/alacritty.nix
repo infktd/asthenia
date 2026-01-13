@@ -94,7 +94,7 @@ in
       font = {
         # Use system monospace font
         # Typically resolves to JetBrains Mono or Iosevka (from Nerd Fonts)
-        normal.family = "monospace";
+        normal.family = "JetBrains Mono Nerd Font";
         
         # Font size in points
         # Adjust based on monitor DPI and preference
@@ -115,7 +115,7 @@ in
         
         # Padding around terminal text
         # Provides breathing room at window edges
-        padding = { x = 8; y = 8; };
+        padding = { x = 0; y = 0; };
         
         # Additional window options:
         # decorations = "full";  # "full", "none", or "transparent"

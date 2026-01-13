@@ -38,10 +38,13 @@
     ../programs/git/git.nix        # Git version control with user identity
     ../programs/nvf/nvf.nix        # Neovim with plugins and LSP
     ../programs/vscode/vscode.nix  # VS Code editor with extensions
+    ../programs/helix/helix.nix    # Helix editor
     
     # --- Shell and Terminal ---
     ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
     ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal
+    ../programs/zellij/zellij.nix  # Terminal workspace manager
+
     
     # --- Applications ---
     ../programs/chrome/chrome.nix      # Chromium browser
