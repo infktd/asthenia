@@ -49,7 +49,6 @@
     # --- Applications ---
     ../programs/chrome/chrome.nix      # Chromium browser
     ../programs/discord/discord.nix    # Discord with custom themes
-    ../programs/obsidian/obsidian.nix  # Note-taking application
     ../programs/yazi/yazi.nix          # Terminal file manager
     ../programs/fuzzle/fuzzle.nix      # Application launcher
   ];
