@@ -85,13 +85,29 @@ in
   };
 
   # Audio configuration (PipeWire replaces PulseAudio and ALSA)
+  services.avahi.enable = true;
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
+    raopOpenFirewall = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    extraConfig.pipewire = {
+      "10-airplay" = {
+      "context.modules" = [
+        {
+          name = "libpipewire-module-raop-discover";
+
+          # increase the buffer size if you get dropouts/glitches
+          # args = {
+          #   "raop.latency.ms" = 500;
+          # };
+        }
+        ];
+      };
+    };
   };
 
   # User configuration
