@@ -65,6 +65,7 @@ let
     signal-desktop    # Secure messaging
     vlc               # Media player
     yubioath-flutter  # Yubikey authenticator
+    obsidian          # Note-taking app
 
     # --- System Utilities ---
     xorg.xhost        # X11 access control (needed for some apps)
