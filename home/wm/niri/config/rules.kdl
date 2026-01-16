@@ -1,0 +1,22 @@
+window-rule {
+    // Match the app (use title="RuneLite" if app-id fails)
+    match app-id="RuneLite"
+
+    // Action: Send to the gaming workspace
+    open-on-workspace "gaming"
+
+    // Sizing for 1440p quadrants
+    // open-floating true
+    default-column-width { fixed 1280; }
+    //default-window-height { fixed 720; }
+}
+
+window-rule {
+    // Match the app
+    match app-id="signal"
+    match app-id="discord"
+
+    // Action: Send to the social workspace
+    open-on-workspace "social"
+
+}

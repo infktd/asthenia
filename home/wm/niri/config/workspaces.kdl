@@ -1,0 +1,6 @@
+workspace "gaming" {
+    open-on-output "DP-2"
+}
+workspace "social" {
+    open-on-output "DP-1"
+}

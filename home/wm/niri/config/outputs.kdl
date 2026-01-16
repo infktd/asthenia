@@ -7,8 +7,8 @@ output "DP-1" {
 
 
     hot-corners {
-        // off
-        top-left
+           off
+        // top-left
         // top-right
         // bottom-left
         // bottom-right
@@ -34,8 +34,8 @@ output "DP-2" {
 
 
     hot-corners {
-        // off
-        top-left
+          off
+        //top-left
         // top-right
         // bottom-left
         // bottom-right
