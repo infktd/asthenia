@@ -34,4 +34,8 @@ include "outputs.kdl"
 // Import window layout configuration (tiling behavior)
 include "layout.kdl"
 
+// Import workspace configuration
+include "workspaces.kdl"
 
+// Import window rules
+include "rules.kdl"

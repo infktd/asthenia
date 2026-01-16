@@ -112,6 +112,8 @@ in
   xdg.configFile."niri/keybindings.kdl".source = ./config/keybindings.kdl;
   xdg.configFile."niri/outputs.kdl".source = ./config/outputs.kdl;
   xdg.configFile."niri/layout.kdl".source = ./config/layout.kdl;
+  xdg.configFile."niri/rules.kdl".source = ./config/rules.kdl;
+  xdg.configFile."niri/workspaces.kdl".source = ./config/workspaces.kdl;
 
   # Electron app optimization for Wayland
   xdg.configFile."electron-flags.conf".text = ''

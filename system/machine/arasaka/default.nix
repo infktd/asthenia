@@ -73,4 +73,14 @@
   # - Network configuration:
   #   networking.interfaces.eth0.useDHCP = true;
   # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # STEAM (Gaming Platform)
+  # ---------------------------------------------------------------------------
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+  };
+  programs.gamemode.enable = true;
 }
