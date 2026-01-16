@@ -23,9 +23,11 @@
 # - GUI apps only needed in desktop (belong in wm/<name>/)
 # - Machine-specific tools (add per-profile)
 # =============================================================================
-{ pkgs, lib, ... }:
-
-let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   # ---------------------------------------------------------------------------
   # USER IDENTITY
   # ---------------------------------------------------------------------------
@@ -34,55 +36,57 @@ let
   username = "infktd";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
-  
+
   # ---------------------------------------------------------------------------
   # CUSTOM SCRIPTS
   # ---------------------------------------------------------------------------
   # Import user scripts from home/scripts/
   # Provides: asthenia (rebuild helper)
-  scripts = pkgs.callPackage ../scripts { };
+  scripts = pkgs.callPackage ../scripts {};
 
   # ---------------------------------------------------------------------------
   # BASE USER PACKAGES
   # ---------------------------------------------------------------------------
   # Core utilities available in all profiles
   # These tools are useful in both CLI and GUI environments
-  packages = with pkgs; [
-    # --- System Monitoring and Information ---
-    bottom      # Modern system monitor (btm) - alternative to htop
-    dust        # Disk usage analyzer - visual, fast alternative to du
-    
-    # --- File and Directory Navigation ---
-    eza         # Modern ls replacement with colors and icons
-    fd          # Fast find replacement with intuitive syntax
-    tree        # Directory tree viewer
-    
-    # --- Text Search and Processing ---
-    ripgrep     # Fast grep alternative (rg) - respects .gitignore
-    
-    # --- Applications ---
-    bolt-launcher     # Launcher application
-    signal-desktop    # Secure messaging
-    vlc               # Media player
-    yubioath-flutter  # Yubikey authenticator
-    obsidian          # Note-taking app
+  packages = with pkgs;
+    [
+      # --- System Monitoring and Information ---
+      bottom # Modern system monitor (btm) - alternative to htop
+      dust # Disk usage analyzer - visual, fast alternative to du
 
-    # --- System Utilities ---
-    xorg.xhost        # X11 access control (needed for some apps)
-    
-    # --- File Management ---
-    unzip         # Extract zip archives
-    zip           # Create zip archives
-    
-    # --- Development Tools ---
-    git           # Version control
+      # --- File and Directory Navigation ---
+      eza # Modern ls replacement with colors and icons
+      fd # Fast find replacement with intuitive syntax
+      tree # Directory tree viewer
 
-    # --- Programming Languages ---
-    python3       # Python interpreter
-    nodejs        # Node.js runtime
-  ] ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
-in
-{
+      # --- Text Search and Processing ---
+      ripgrep # Fast grep alternative (rg) - respects .gitignore
+
+      # --- Applications ---
+      bolt-launcher # Launcher application
+      signal-desktop # Secure messaging
+      vlc # Media player
+      yubioath-flutter # Yubikey authenticator
+      obsidian # Note-taking app
+
+      # --- System Utilities ---
+      xorg.xhost # X11 access control (needed for some apps)
+
+      # --- File Management ---
+      unzip # Extract zip archives
+      zip # Create zip archives
+
+      # --- Development Tools ---
+      git # Version control
+      github-copilot-cli # GitHub Copilot CLI tool
+
+      # --- Programming Languages ---
+      python3 # Python interpreter
+      nodejs # Node.js runtime
+    ]
+    ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
+in {
   # ---------------------------------------------------------------------------
   # HOME MANAGER
   # ---------------------------------------------------------------------------
@@ -95,9 +99,9 @@ in
   # ---------------------------------------------------------------------------
   # Import modular configuration files
   imports = [
-    ../themes           # GTK themes, icons, fonts
-    ./programs.nix      # Program-specific configurations
-    ./services.nix      # User-level services (gpg-agent, etc.)
+    ../themes # GTK themes, icons, fonts
+    ./programs.nix # Program-specific configurations
+    ./services.nix # User-level services (gpg-agent, etc.)
   ];
 
   # ---------------------------------------------------------------------------
@@ -106,8 +110,8 @@ in
   # Standard Linux directory structure for config/data/cache
   # Ensures apps put files in the right places
   xdg = {
-    inherit configHome;  # ~/.config
-    enable = true;       # Enable XDG directory management
+    inherit configHome; # ~/.config
+    enable = true; # Enable XDG directory management
     # Also provides: ~/.local/share, ~/.cache, etc.
   };
 
@@ -126,7 +130,7 @@ in
     # Available in all shells and graphical sessions
     sessionVariables = {
       # Default text editor for CLI tools
-      EDITOR = "vim";
+      EDITOR = "nvim";
       # Note: Additional session vars for Wayland/NVIDIA in home/wm/niri
     };
   };

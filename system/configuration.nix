@@ -47,6 +47,9 @@ in
     # Home Manager is managed separately via standalone configuration.
     # Run: home-manager switch --flake .#niri
     # (Home Manager nixosModule integration removed to enable full feature set)
+
+    # Neovim - system-level editor configuration
+    inputs.neovim-flake.nixosModules.default
   ];
 
 
