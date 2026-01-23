@@ -1,35 +1,3 @@
-# =============================================================================
-# SYSTEM CONFIGURATION
-# =============================================================================
-# This file manages system-wide NixOS settings. User-level configurations
-# are managed separately via standalone Home Manager (home-manager switch).
-#
-# CONFIGURATION PHILOSOPHY:
-# - System level: Core OS, services, hardware, system-wide programs
-# - User level (Home Manager): Dotfiles, user applications, themes
-#
-# For niri/DMS: System provides session infrastructure (login, systemd services),
-# user provides configuration files and appearance settings.
-# =============================================================================
-
-
-# =============================================================================
-# HOME MANAGER (Standalone)
-# =============================================================================
-# Home Manager configurations are managed independently via:
-#   home-manager switch --flake .#niri
-#
-# This separation provides:
-# - Full access to all Home Manager options
-# - Independent user config updates (no sudo required)
-# - Per-user customization
-#
-# Home Manager configs located at:
-#   home/wm/niri/        - Niri window manager user config
-#   home/shared/         - Shared user config (all profiles)
-#   home/programs/       - Individual program configurations
-# =============================================================================
-
 { config, lib, pkgs, inputs, ... }:
 
 let
@@ -43,38 +11,34 @@ let
 in
 
 {
-  imports = [
-    # Home Manager is managed separately via standalone configuration.
-    # Run: home-manager switch --flake .#niri
-    # (Home Manager nixosModule integration removed to enable full feature set)
+  # === BOOT ===
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [ "processor.max_cstate=1" ];
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.enable = true;
 
-    # Neovim - system-level editor configuration
-    inputs.neovim-flake.nixosModules.default
+  # === ENVIRONMENT ===
+  environment.systemPackages = with pkgs; [
+    curl
+    devenv
+    dive
+    docker
+    docker-compose
+    git
+    home-manager
+    pcscliteWithPolkit
+    podman-tui
+    vim
+    wget
   ];
 
+  # === FONTS ===
+  fonts.packages = with pkgs; [
+    font-awesome
+  ] ++ customFonts;
 
-  # Bootloader
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-  };
-
-
-  # Kernel parameters
-  boot.kernelParams = [ "processor.max_cstate=1" ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # Networking
-  networking = {
-    hostName = "arasaka";
-    networkmanager.enable = true;
-  };
-
-  # Timezone and locale
-  time.timeZone = "America/Chicago";
-
+  # === I18N ===
   i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
@@ -87,121 +51,87 @@ in
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Audio configuration (PipeWire replaces PulseAudio and ALSA)
-  services.avahi.enable = true;
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    raopOpenFirewall = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    extraConfig.pipewire = {
-      "10-airplay" = {
-      "context.modules" = [
-        {
-          name = "libpipewire-module-raop-discover";
-
-          # increase the buffer size if you get dropouts/glitches
-          # args = {
-          #   "raop.latency.ms" = 500;
-          # };
-        }
-        ];
-      };
-    };
-  };
-
-  # User configuration
-  users.users.infktd = {
-    isNormalUser = true;
-    description = "infktd";
-    extraGroups = [ "networkmanager" "wheel" "video" "render" "docker" ];
-    shell = pkgs.zsh;
-  };
-
-  # System packages
-  environment.systemPackages = with pkgs; [
-    vim
-    wget
-    git
-    curl
-    pcscliteWithPolkit
-    docker
-    docker-compose
-    podman-tui
-    dive
-    devenv
-    home-manager  # Required for standalone Home Manager usage
+  # === IMPORTS ===
+  imports = [
+    inputs.neovim-flake.nixosModules.default
   ];
 
-  # Enable common container config files in /etc/containers
-    virtualisation.containers.enable = true;
-    virtualisation = {
-      podman = {
-        enable = true;
-
-        # Create a `docker` alias for podman, to use it as a drop-in replacement
-        dockerCompat = true;
-
-        # Required for containers under podman-compose to be able to talk to each other.
-        defaultNetwork.settings.dns_enabled = true;
-      };
-    };
-
-  # Enable Tailscale
-  services.tailscale.enable = true;
-  
-  # Enable zsh system-wide
-  programs.zsh.enable = true;
-
-  # PCSCD (Smartcard Support)
-  services.pcscd = {
-    enable = true;
-  };
-
-  # Making fonts accessible to applications
-  fonts.packages = with pkgs; [
-    font-awesome
-  ] ++ customFonts;
-
-  # Enable flakes
-  nix = {
-    package = pkgs.nixVersions.latest;
-
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-      auto-optimise-store = true;
-
-      # Trusted users for nix commands
-      trusted-users = [ "root" "@wheel" ];
-    };
-
-    # Automatic garbage collection
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
-  };
-
-  # Enable SSH
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = true;
-    };
-  };
-
-  # Firewall
+  # === NETWORKING ===
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ ];
     allowedUDPPorts = [ ];
   };
+  networking.hostName = "arasaka";
+  networking.networkmanager.enable = true;
 
-  # System version
-  system.stateVersion = "24.11"; # Don't change this after initial install
+  # === NIX ===
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+  nix.package = pkgs.nixVersions.latest;
+  nix.settings = {
+    auto-optimise-store = true;
+    experimental-features = [ "nix-command" "flakes" ];
+    trusted-users = [ "root" "@wheel" ];
+  };
+
+  # === PROGRAMS ===
+  programs.zsh.enable = true;
+
+  # === SECURITY ===
+  security.rtkit.enable = true;
+
+  # === SERVICES ===
+  services.avahi.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = true;
+      PermitRootLogin = "no";
+    };
+  };
+  services.pcscd.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    extraConfig.pipewire = {
+      "10-airplay" = {
+        "context.modules" = [
+          {
+            name = "libpipewire-module-raop-discover";
+          }
+        ];
+      };
+    };
+    pulse.enable = true;
+    raopOpenFirewall = true;
+  };
+  services.pulseaudio.enable = false;
+  services.tailscale.enable = true;
+
+  # === SYSTEM ===
+  system.stateVersion = "24.11";
+
+  # === TIME ===
+  time.timeZone = "America/Chicago";
+
+  # === USERS ===
+  users.users.infktd = {
+    description = "infktd";
+    extraGroups = [ "networkmanager" "wheel" "video" "render" "docker" ];
+    isNormalUser = true;
+    shell = pkgs.zsh;
+  };
+
+  # === VIRTUALISATION ===
+  virtualisation.containers.enable = true;
+  virtualisation.podman = {
+    defaultNetwork.settings.dns_enabled = true;
+    dockerCompat = true;
+    enable = true;
+  };
 }
