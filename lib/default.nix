@@ -7,12 +7,10 @@
 # INTEGRATION:
 # - Imported by lib/overlays.nix
 # - Extended into pkgs.lib via libOverlay
-# - Available as lib.exe, lib.removeNewline, lib.secretManager everywhere
+# - Available as lib.exe everywhere
 #
-# USAGE EXAMPLES:
+# USAGE EXAMPLE:
 # - lib.exe pkgs.zsh => "/nix/store/.../bin/zsh"
-# - lib.removeNewline fileContents
-# - lib.secretManager.readSecret "~/.secrets/token"
 # =============================================================================
 { lib }:
 
@@ -38,48 +36,4 @@
   #   Used in: sessionVariables.SHELL = "${lib.exe pkgs.zsh}";
   # ---------------------------------------------------------------------------
   exe = pkg: "${lib.getBin pkg}/bin/${pkg.pname or pkg.name}";
-
-  # ---------------------------------------------------------------------------
-  # STRING CLEANING UTILITIES
-  # ---------------------------------------------------------------------------
-  # Removes trailing newline character from strings
-  #
-  # USE CASES:
-  # - Cleaning output from readFile that includes trailing newlines
-  # - Processing command output that ends with \n
-  # - Preparing strings for concatenation
-  #
-  # PARAMETERS:
-  # - str: String to clean
-  #
-  # RETURNS:
-  # - String without trailing newline
-  #
-  # EXAMPLE:
-  #   lib.removeNewline "hello\n" => "hello"
-  # ---------------------------------------------------------------------------
-  removeNewline = str: lib.strings.removeSuffix "\n" str;
-
-  # ---------------------------------------------------------------------------
-  # SECRET MANAGEMENT
-  # ---------------------------------------------------------------------------
-  # Provides functions for reading secrets from files
-  #
-  # SECURITY CONSIDERATIONS:
-  # - Secrets read this way are stored in the Nix store (world-readable!)
-  # - Only use for non-critical secrets or during development
-  # - For production, consider: sops-nix, agenix, or vault integration
-  #
-  # USAGE:
-  #   programs.git.userEmail = lib.secretManager.readSecret "./secrets/email";
-  #
-  # FUTURE ENHANCEMENTS:
-  # - Could integrate with sops-nix for encrypted secrets
-  # - Could add runtime secret injection via systemd
-  # ---------------------------------------------------------------------------
-  secretManager = {
-    # Read a secret from a file path
-    # WARNING: Result will be in Nix store (world-readable)
-    readSecret = path: builtins.readFile path;
-  };
 }
