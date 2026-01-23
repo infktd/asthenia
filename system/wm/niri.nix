@@ -74,7 +74,6 @@
         restartIfChanged = true;
       };
       enableSystemMonitoring = true;
-      enableClipboard = true;
       enableDynamicTheming = true;
       enableAudioWavelength = true;
     };
