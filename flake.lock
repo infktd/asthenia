@@ -6,11 +6,19 @@
         "quickshell": "quickshell"
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768764260,
         "narHash": "sha256-UXomZHMbeILQTXrYsP8fusFCLF6TZCTzKV/fPiGblKc=",
         "owner": "AvengeMedia",
         "repo": "DankMaterialShell",
         "rev": "7cb39f00ad9aaa14f35726ebe1bf7077879db68a",
+=======
+        "lastModified": 1768575001,
+        "narHash": "sha256-k4TD5dYg8bZQP8RbkNZidHdmvxrvjSnaGsJNRJbDaFI=",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "d7b7086b215834a8fae5a8021efca6989d5b8370",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {
@@ -111,11 +119,19 @@
         ]
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768770171,
         "narHash": "sha256-JPmLGZgdWa8QcQbbtBqyZhpmxIHZ3lUO48laERjw+4k=",
         "owner": "nix-community",
         "repo": "home-manager",
         "rev": "521d5ea1a229ba315dd1cceaf869946ddcc83d36",
+=======
+        "lastModified": 1768598210,
+        "narHash": "sha256-kkgA32s/f4jaa4UG+2f8C225Qvclxnqs76mf8zvTVPg=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "c47b2cc64a629f8e075de52e4742de688f930dc6",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {
@@ -193,11 +209,19 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768767453,
         "narHash": "sha256-Omq1UHEJ1oxkTo2j8l6qQtmyPR7Uj+k7HC5Khd3jVVA=",
         "owner": "sodiboo",
         "repo": "niri-flake",
         "rev": "8eab7c21ef4edc97cc56ddb8e76a842e0818d6d7",
+=======
+        "lastModified": 1768601625,
+        "narHash": "sha256-tQ+QHQ95BPSldBEU5SyxSW13yO3XRp87z+QPZmKUy+k=",
+        "owner": "sodiboo",
+        "repo": "niri-flake",
+        "rev": "395c7aef5c8fcc39cfe8bbf235298be291d1325e",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {
@@ -226,11 +250,19 @@
     "niri-unstable": {
       "flake": false,
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768678265,
         "narHash": "sha256-Ub8eed4DsfIDWyg30xEe+8bSxL/z5Af/gCjmvJ0V/Hs=",
         "owner": "YaLTeR",
         "repo": "niri",
         "rev": "d7184a04b904e07113f4623610775ae78d32394c",
+=======
+        "lastModified": 1768487377,
+        "narHash": "sha256-+WOpoDSvYJds8zCMlwDHKBivxSViM5n1J1Jo9Lcf19Y=",
+        "owner": "YaLTeR",
+        "repo": "niri",
+        "rev": "87e2dd0361172a48cb3ac8e5b3f6f701c758700d",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {
@@ -246,11 +278,19 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768610265,
         "narHash": "sha256-JZgnO/gPPBgFCKsQHIT2mRcK0vkwWGfyg/6wOJkb+F8=",
         "owner": "kaylorben",
         "repo": "nixcord",
         "rev": "02c730b57b8ef16c62624a3410ef724d014c58db",
+=======
+        "lastModified": 1768550568,
+        "narHash": "sha256-q7m8gDa/6JjWSDjT6Fosc7bw8YetSvfBqVZe0gxS0+c=",
+        "owner": "kaylorben",
+        "repo": "nixcord",
+        "rev": "eee0f42431129fd2ff08491fe80dc5a6ce5e2872",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {
@@ -292,11 +332,19 @@
     },
     "nixpkgs-stable": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1768621446,
         "narHash": "sha256-6YwHV1cjv6arXdF/PQc365h1j+Qje3Pydk501Rm4Q+4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
         "rev": "72ac591e737060deab2b86d6952babd1f896d7c5",
+=======
+        "lastModified": 1768323494,
+        "narHash": "sha256-yBXJLE6WCtrGo7LKiB6NOt6nisBEEkguC/lq/rP3zRQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2c3e5ec5df46d3aeee2a1da0bfedd74e21f4bf3a",
+>>>>>>> b563f35 (feat: add zed-editor configuration, include opencode in shared defaults, and remove clipboard enablement in niri)
         "type": "github"
       },
       "original": {

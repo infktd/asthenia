@@ -80,6 +80,7 @@
       # --- Development Tools ---
       git # Version control
       github-copilot-cli # GitHub Copilot CLI tool
+      opencode # Opensource code editor
 
       # --- Programming Languages ---
       python3 # Python interpreter
