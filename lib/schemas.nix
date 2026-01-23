@@ -54,7 +54,7 @@
       - overlays: Our overlay functions for extending nixpkgs
       
       External flakes can consume these to gain access to:
-      - Custom library functions (lib.exe, lib.secretManager, etc.)
+      - Custom library functions (lib.exe)
       - Builder functions (mkHome, mkNixos)
       - Niri unstable package
     '';
