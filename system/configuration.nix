@@ -72,9 +72,9 @@ in
 
   # Timezone and locale
   time.timeZone = "America/Chicago";
-  
+
   i18n.defaultLocale = "en_US.UTF-8";
-  
+
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
@@ -117,7 +117,7 @@ in
   users.users.infktd = {
     isNormalUser = true;
     description = "infktd";
-    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "render" "docker" ];
     shell = pkgs.zsh;
   };
 
@@ -128,9 +128,31 @@ in
     git
     curl
     pcscliteWithPolkit
+    docker
+    docker-compose
+    podman-tui
+    dive
+    devenv
     home-manager  # Required for standalone Home Manager usage
   ];
 
+  # Enable common container config files in /etc/containers
+    virtualisation.containers.enable = true;
+    virtualisation = {
+      podman = {
+        enable = true;
+
+        # Create a `docker` alias for podman, to use it as a drop-in replacement
+        dockerCompat = true;
+
+        # Required for containers under podman-compose to be able to talk to each other.
+        defaultNetwork.settings.dns_enabled = true;
+      };
+    };
+
+  # Enable Tailscale
+  services.tailscale.enable = true;
+  
   # Enable zsh system-wide
   programs.zsh.enable = true;
 
@@ -147,11 +169,11 @@ in
   # Enable flakes
   nix = {
     package = pkgs.nixVersions.latest;
-    
+
     settings = {
       experimental-features = [ "nix-command" "flakes" ];
       auto-optimise-store = true;
-      
+
       # Trusted users for nix commands
       trusted-users = [ "root" "@wheel" ];
     };
