@@ -72,6 +72,8 @@
 
       # --- System Utilities ---
       xorg.xhost # X11 access control (needed for some apps)
+      xdg-utils # Utilities for managing XDG directories and MIME types
+      vulkan-tools # Vulkan utilities (vulkaninfo, etc.)
 
       # --- File Management ---
       unzip # Extract zip archives
@@ -81,10 +83,13 @@
       git # Version control
       github-copilot-cli # GitHub Copilot CLI tool
       opencode # Opensource code editor
+      claude-code # Claude AI code assistant
+
 
       # --- Programming Languages ---
       python3 # Python interpreter
       nodejs # Node.js runtime
+      go # Go programming language
     ]
     ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
 in {

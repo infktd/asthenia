@@ -9,7 +9,7 @@ binds {
 
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
-     
+
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // =========================
@@ -154,7 +154,7 @@ binds {
     // Screenshots
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
+    Mod+X { screenshot-window; }
 
     // Keyboard shortcuts inhibitor
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
@@ -163,4 +163,4 @@ binds {
     Mod+Shift+E { quit; }
     Ctrl+Alt+Delete { quit; }
     Mod+Shift+P { power-off-monitors; }
-} 
+}

@@ -37,6 +37,7 @@
     # --- Development Tools ---
     ../programs/git/git.nix        # Git version control with user identity
     ../programs/vscode/vscode.nix  # VS Code editor with extensions
+    ../programs/zed-editor/zed-editor.nix  # Zed editor
     
     # --- Shell and Terminal ---
     ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
