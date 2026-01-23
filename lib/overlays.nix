@@ -5,9 +5,8 @@
 # They allow us to add custom packages, modify existing ones, and inject utilities
 #
 # OVERLAY ARCHITECTURE:
-# 1. libOverlay: Extends pkgs.lib with custom utility functions
+# 1. libOverlay: Extends pkgs.lib with lib.exe utility function
 # 2. overlays: Adds builder functions for creating configurations
-# 3. niri-flake overlay: Adds niri-unstable package from upstream
 #
 # HOW OVERLAYS WORK:
 # - f (final): The final package set after all overlays are applied
@@ -39,11 +38,11 @@ let
   #
   # WHAT IT DOES:
   # 1. Imports ./default.nix (our custom lib functions)
-  # 2. Extends pkgs.lib to include: exe, removeNewline, secretManager
+  # 2. Extends pkgs.lib to include: exe
   # 3. Applies version overlay for nixos-version support
   #
   # RESULT:
-  # - All Nix files can use lib.exe, lib.removeNewline, etc.
+  # - All Nix files can use lib.exe
   # - Version information is properly tracked
   #
   # OVERLAY PATTERN:
@@ -56,7 +55,7 @@ let
     
     # Extend nixpkgs lib with our custom functions and version info
     lib = (p.lib.extend (_: _: {
-      inherit (libx) exe removeNewline secretManager;
+      inherit (libx) exe;
     })).extend libVersionOverlay;
   };
 
@@ -117,7 +116,7 @@ in
 # OVERLAY LIST
 # =============================================================================
 # Overlays are applied in order:
-# 1. libOverlay: Adds custom lib functions (exe, removeNewline, etc.)
+# 1. libOverlay: Adds lib.exe function
 # 2. overlays: Adds builder functions (mkHome, mkNixos)
 # 3. niri-flake overlay: Adds niri-unstable package
 #
