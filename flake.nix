@@ -87,11 +87,6 @@
       url = "github:kaylorben/nixcord";
     };
 
-    # zed-editor - High-performance code editor (latest from upstream)
-    zed-editor = {
-      url = "github:zed-industries/zed";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   # =============================================================================

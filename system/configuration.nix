@@ -79,7 +79,10 @@ in
   };
 
   # === PROGRAMS ===
-  programs.nix-ld.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    libraries = pkgs.steam-run.args.multiPkgs pkgs;
+  };
   programs.zsh.enable = true;
 
   # === SECURITY ===
