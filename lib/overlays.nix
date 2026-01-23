@@ -126,5 +126,4 @@ in
   libOverlay
   overlays
   inputs.niri-flake.overlays.niri    # Provides pkgs.niri-unstable
-  inputs.zed-editor.overlays.default # Provides pkgs.zed-editor (latest from upstream)
 ]
