@@ -1,17 +1,28 @@
 name: flake.lock Update
 
-
 on:
   schedule:
     - cron: '0 0 * * 1' # Every Monday at 00:00 UTC
   workflow_dispatch:
 
+# Grant permissions needed to push or create PRs and to enable auto-merge
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
+    env:
+      # make sure the workflow can use the token in shell steps
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout repository
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
@@ -24,12 +35,102 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Update flake.lock
-        run: nix flake update
+        id: update
+        run: |
+          set -euo pipefail
+          # ensure we operate on the checked out main
+          git status --porcelain --untracked-files=no
+          nix flake update
 
-      - name: Create Pull Request
+      - name: Commit changes
+        id: commit
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- flake.lock; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes to flake.lock. Exiting."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "chore: update flake.lock"
+
+          # Try to push directly to main. If this fails (branch protection), don't fail the job yet.
+          if git push origin HEAD:main; then
+            echo "pushed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "pushed=false" >> $GITHUB_OUTPUT
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create fallback branch and push (when direct push failed)
+        if: steps.commit.outputs.changed == 'true' && steps.commit.outputs.pushed == 'false'
+        id: create_branch
+        run: |
+          set -euo pipefail
+          BRANCH="flake-lock-update-${{ github.run_id }}"
+          echo "Creating branch: $BRANCH"
+          git checkout -b "$BRANCH"
+          git push -u origin "$BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request (if push to main failed)
+        if: steps.commit.outputs.changed == 'true' && steps.commit.outputs.pushed == 'false'
+        id: create_pr
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update flake.lock"
           title: "chore: update flake.lock"
-          body: "Automated weekly flake.lock update"
-          branch: flake-lock-update
+          body: |
+            Automated weekly flake.lock update.
+
+            If this PR looks good, it will be auto-merged when checks pass.
+          branch: ${{ steps.create_branch.outputs.branch }}
+          base: main
+          labels: automated,dependencies
+          draft: false
+          # do not close existing PRs for the same branch name automatically
+
+      - name: Enable auto-merge for PR (attempt)
+        if: steps.commit.outputs.changed == 'true' && steps.commit.outputs.pushed == 'false'
+        id: enable_auto_merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.create_pr.outputs.pull_request_number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Get the Pull Request node_id via the REST API
+          echo "Attempting to enable auto-merge for PR #${PR_NUMBER}"
+          PR_NODE_ID=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" \
+            | python -c "import sys, json; print(json.load(sys.stdin)['node_id'])")
+          if [ -z "$PR_NODE_ID" ] || [ "$PR_NODE_ID" = "None" ]; then
+            echo "Could not determine PR node id. Skipping auto-merge enable."
+            exit 0
+          fi
+
+          # Try GraphQL mutation to enable auto-merge (requires repo permissions & that auto-merge is allowed)
+          read -r -d '' PAYLOAD <<'GRAPHQL' || true
+{"query":"mutation EnableAutoMerge($input: EnablePullRequestAutoMergeInput!) { enablePullRequestAutoMerge(input: $input) { clientMutationId } }","variables":{"input":{"pullRequestId":"REPLACE_PR_NODE_ID","mergeMethod":"MERGE"}}}
+GRAPHQL
+
+          PAYLOAD="${PAYLOAD/REPLACE_PR_NODE_ID/$PR_NODE_ID}"
+
+          RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Content-Type: application/json" -d "$PAYLOAD" https://api.github.com/graphql)
+          echo "GraphQL response: $RESPONSE"
+          # Best-effort: if enabling auto-merge fails, we leave the PR for manual or auto-merge configuration.
+          echo "Auto-merge attempt completed (check response above for success or failure)."
+
+      - name: Finished - pushed to main
+        if: steps.commit.outputs.changed == 'true' && steps.commit.outputs.pushed == 'true'
+        run: |
+          echo "flake.lock updated and pushed directly to main."
+
+      - name: No changes
+        if: steps.commit.outputs.changed == 'false'
+        run: |
+          echo "No changes to flake.lock; nothing to do."
