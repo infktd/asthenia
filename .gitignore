@@ -1,6 +1,7 @@
 # Ignore build results
 result
 result-*
+error.log
 
 # Ignore secrets
 home/secrets/*
