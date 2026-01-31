@@ -132,6 +132,7 @@ in
   services.tailscale = {
     enable = true;
     authKeyFile = "/run/secrets/tailscale_auth_key";
+    extraUpFlags = [ "--ssh" ];
   };
 
   # === SOPS ===

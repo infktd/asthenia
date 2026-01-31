@@ -54,49 +54,23 @@ jobs:
           done
           tailscale status
 
-      - name: Debug Tailscale connectivity
+      - name: Wait for Tailscale SSH
         run: |
-          echo "=== Tailscale status ==="
-          tailscale status
-          echo ""
-          echo "=== Tailscale netcheck ==="
-          tailscale netcheck
-          echo ""
-          echo "=== Ping test ==="
-          ping -c 3 ${{ env.ARASAKA_IP }} || echo "Ping failed"
-          echo ""
-          echo "=== Route to target ==="
-          ip route get ${{ env.ARASAKA_IP }} || echo "No route"
-          echo ""
-          echo "=== Trying curl ==="
-          curl -v --connect-timeout 5 telnet://${{ env.ARASAKA_IP }}:22 2>&1 | head -20 || echo "Curl failed"
-
-      - name: Verify connectivity
-        run: |
-          echo "Testing connectivity to arasaka..."
-          for i in {1..10}; do
-            if nc -zw5 ${{ env.ARASAKA_IP }} 22; then
-              echo "Port 22 is reachable"
-              exit 0
+          echo "Waiting for Tailscale SSH to be ready..."
+          for i in {1..30}; do
+            if tailscale status | grep -q "arasaka"; then
+              echo "Can see arasaka in Tailscale network"
+              tailscale status
+              break
             fi
-            echo "Attempt $i/10: Waiting for SSH port..."
-            sleep 3
+            echo "Attempt $i/30: Waiting..."
+            sleep 2
           done
-          echo "Failed to reach arasaka on port 22"
-          exit 1
 
       - name: Deploy to arasaka
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.CD_SSH_PRIVATE_KEY }}
         run: |
-          # Setup SSH
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ env.ARASAKA_IP }} >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          # Deploy
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 infktd@${{ env.ARASAKA_IP }} << 'EOF'
+          # Deploy using Tailscale SSH (uses machine name, not IP)
+          tailscale ssh infktd@arasaka << 'EOF'
             cd ~/.config/asthenia
             git pull
             sudo nixos-rebuild switch --flake .#arasaka
@@ -127,45 +101,23 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
 
-      - name: Wait for Tailscale connection
+      - name: Wait for Tailscale SSH
         run: |
-          echo "Waiting for Tailscale to connect..."
+          echo "Waiting for Tailscale SSH to be ready..."
           for i in {1..30}; do
-            if tailscale status | grep -q "${{ env.ESOTERIC_IP }}"; then
-              echo "Tailscale connected, can see esoteric"
+            if tailscale status | grep -q "esoteric"; then
+              echo "Can see esoteric in Tailscale network"
+              tailscale status
               break
             fi
-            echo "Attempt $i/30: Waiting for Tailscale..."
+            echo "Attempt $i/30: Waiting..."
             sleep 2
           done
-          tailscale status
-
-      - name: Verify connectivity
-        run: |
-          echo "Testing connectivity to esoteric..."
-          for i in {1..10}; do
-            if nc -zw5 ${{ env.ESOTERIC_IP }} 22; then
-              echo "Port 22 is reachable"
-              exit 0
-            fi
-            echo "Attempt $i/10: Waiting for SSH port..."
-            sleep 3
-          done
-          echo "Failed to reach esoteric on port 22"
-          exit 1
 
       - name: Deploy to esoteric
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.CD_SSH_PRIVATE_KEY }}
         run: |
-          # Setup SSH
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ env.ESOTERIC_IP }} >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          # Deploy
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 jayne@${{ env.ESOTERIC_IP }} << 'EOF'
+          # Deploy using Tailscale SSH (uses machine name, not IP)
+          tailscale ssh jayne@esoteric << 'EOF'
             cd ~/.config/asthenia
             git pull
             darwin-rebuild switch --flake .#esoteric
