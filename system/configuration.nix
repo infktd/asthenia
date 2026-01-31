@@ -127,7 +127,17 @@ in
     raopOpenFirewall = true;
   };
   services.pulseaudio.enable = false;
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    authKeyFile = "/run/secrets/tailscale_auth_key";
+  };
+
+  # === SOPS ===
+  sops = {
+    defaultSopsFile = ../secrets/secrets.yaml;
+    age.keyFile = "/home/infktd/.config/sops/age/keys.txt";
+    secrets.tailscale_auth_key = {};
+  };
 
   # === SYSTEM ===
   system.stateVersion = "24.11";

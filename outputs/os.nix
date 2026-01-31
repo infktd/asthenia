@@ -64,10 +64,13 @@ let
   modules' = [
     # Base system configuration (shared by all machines)
     ../system/configuration.nix
-    
+
+    # sops-nix for system-level secrets (Tailscale auth, etc.)
+    inputs.sops-nix.nixosModules.sops
+
     # Allow additional modules to be injected from caller
     extraSystemConfig
-    
+
     # Pin nixpkgs registry to our flake input version
     # Makes 'nix run nixpkgs#...' use the same version as system
     { nix.registry.nixpkgs.flake = inputs.nixpkgs; }
