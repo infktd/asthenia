@@ -443,7 +443,38 @@ home-manager switch --flake .#niri
 
 ## CI/CD
 
-This repository includes GitHub Actions workflows for continuous integration. Builds are cached using [Cachix](https://cachix.org) to speed up subsequent runs.
+This repository includes a complete CI/CD pipeline using GitHub Actions. The system automatically validates builds, caches compiled packages, and can deploy changes to your machines over a secure network.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CI/CD PIPELINE                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                │
+│   │   TRIGGER    │     │    BUILD     │     │    CACHE     │                │
+│   │              │     │              │     │              │                │
+│   │  • Push      │────>│  • NixOS     │────>│  • Cachix    │                │
+│   │  • PR        │     │  • Darwin    │     │  (personal)  │                │
+│   │  • Manual    │     │  • Home Mgr  │     │              │                │
+│   │  • Schedule  │     │              │     │  • nix-comm  │                │
+│   └──────────────┘     └──────────────┘     │  (upstream)  │                │
+│                                              └──────────────┘                │
+│                                                     │                        │
+│                                                     v                        │
+│   ┌──────────────────────────────────────────────────────────────────┐      │
+│   │                         DEPLOYMENT                                │      │
+│   │                                                                   │      │
+│   │   GitHub Runner ──(Tailscale VPN)──> Your Machines               │      │
+│   │                                                                   │      │
+│   │   • Secure SSH over encrypted tunnel                             │      │
+│   │   • No exposed ports or public IPs needed                        │      │
+│   │   • Pulls from cache, applies config                             │      │
+│   └──────────────────────────────────────────────────────────────────┘      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Why CI/CD for NixOS?
 
@@ -460,88 +491,345 @@ This repository includes GitHub Actions workflows for continuous integration. Bu
 **Faster Local Rebuilds with Cachix**
 - CI builds packages and pushes to your personal binary cache
 - Your local machine pulls pre-built packages instead of compiling
-- NVIDIA drivers, large packages, and custom builds are cached
+- Large packages like NVIDIA drivers, Rust programs (niri), and custom builds are cached
 - Turns 30-minute rebuilds into 2-minute downloads
 
-**Confidence to Experiment**
-- Know immediately if a change breaks something
-- Easy to bisect issues by looking at CI history
-- Safe to try new packages or configurations
+**Cache Warming with Flake Updates**
+- Weekly flake update workflow builds ALL configurations after updating
+- By the time you merge the update, everything is pre-built in your cache
+- Your local rebuild after merging is near-instant
 
-**Documentation of What Works**
-- Green CI = known working configuration
-- CI history shows what changed and when
-- Useful for rolling back or debugging issues
+**Automated Deployment**
+- Changes can be automatically deployed to your machines after CI passes
+- Uses Tailscale for secure connectivity - no public IPs or port forwarding
+- SSH-based deployment with dedicated CI keys
 
 ### Workflows
 
-| Workflow | Triggers On | Builds |
-|----------|-------------|--------|
-| `nixos-build.yml` | `system/machine/arasaka/**`, `system/wm/**`, shared system files | NixOS (arasaka) |
-| `darwin-build.yml` | `system/machine/esoteric/**`, shared system files | nix-darwin (esoteric) |
-| `home-manager-linux.yml` | `home/wm/niri/**`, shared home files | Home Manager (default, niri) |
-| `home-manager-darwin.yml` | `home/wm/aerospace/**`, shared home files | Home Manager (default-darwin, aerospace) |
-| `flake-check.yml` | All pushes/PRs | `nix flake check` |
-| `format-check.yml` | All pushes/PRs | Alejandra formatting |
-| `update-flake.yml` | Weekly (Monday) or manual | Updates `flake.lock` |
+| Workflow | Triggers On | Purpose |
+|----------|-------------|---------|
+| `nixos-build.yml` | arasaka system files, flake changes | Build and cache NixOS configuration |
+| `darwin-build.yml` | esoteric system files, flake changes | Build and cache nix-darwin configuration |
+| `home-manager-linux.yml` | Linux home files, flake changes | Build and cache Home Manager (default, niri) |
+| `home-manager-darwin.yml` | Darwin home files, flake changes | Build and cache Home Manager (default-darwin, aerospace) |
+| `update-flake.yml` | Weekly (Monday) or manual | Update flake.lock and pre-warm all caches |
+| `deploy.yml` | After successful builds or manual | Deploy to machines via Tailscale SSH |
+| `flake-check.yml` | All pushes/PRs | Run `nix flake check` |
+| `format-check.yml` | All pushes/PRs | Check Alejandra formatting |
 
-All workflows can be triggered manually via the GitHub Actions UI.
+All workflows can be triggered manually via the GitHub Actions UI (Actions tab, select workflow, "Run workflow").
 
-### Setting Up CI for Your Fork
+### How Caching Works
 
-If you fork this repo, the basic CI workflows will work automatically - they just verify builds succeed.
+The CI pipeline uses multiple cache layers to minimize build times:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      CACHE HIERARCHY                             │
+│                                                                  │
+│   1. cache.nixos.org        - Official NixOS packages           │
+│      (checked first)          Nearly everything in nixpkgs      │
+│                                                                  │
+│   2. nix-community.cachix   - Community packages                │
+│      (checked second)         niri-unstable, neovim plugins,    │
+│                               other flake-based packages        │
+│                                                                  │
+│   3. your-cache.cachix      - Your personal cache               │
+│      (checked third)          Machine-specific closures,        │
+│                               anything not in upstream caches   │
+│                                                                  │
+│   4. Build from source      - Last resort                       │
+│      (only if not cached)     Only happens for new/changed      │
+│                               derivations                        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+When you run `nixos-rebuild switch` or `home-manager switch`, Nix checks each cache in order. If a package is found, it downloads the pre-built binary. If not found anywhere, it builds from source and (if you have Cachix set up) pushes the result to your personal cache for next time.
+
+### Setting Up CI (Basic)
+
+If you fork this repo, the basic CI workflows work automatically. They verify builds succeed but do not cache results or deploy anywhere.
 
 ### Setting Up Cachix (Recommended)
 
-Cachix dramatically speeds up CI builds by caching built packages. Without it, every CI run rebuilds everything from scratch.
+Cachix provides a personal binary cache that dramatically speeds up builds. Without it, CI rebuilds everything from scratch every time.
 
-1. **Create a Cachix account**: Go to [cachix.org](https://cachix.org) and sign in with GitHub
+**Step 1: Create a Cachix Account**
 
-2. **Create a cache**: Pick a name (e.g., your username or repo name)
+1. Go to [cachix.org](https://cachix.org)
+2. Sign in with GitHub
+3. Create a new cache (pick any name, like your GitHub username)
 
-3. **Configure upstream caches** (optional but recommended): In your cache settings, add these to skip uploading packages already cached elsewhere:
-   - `cache.nixos.org`
-   - `nix-community.cachix.org`
+**Step 2: Configure Upstream Caches**
 
-4. **Create an auth token**: Go to [Personal Auth Tokens](https://app.cachix.org/personal-auth-tokens) and create a token with Write permission. Set expiry to "never" for CI use.
+In your Cachix dashboard, go to your cache settings and add upstream caches. This prevents re-uploading packages that already exist elsewhere:
 
-5. **Add the token to GitHub**: Go to your repo → Settings → Secrets and variables → Actions → New repository secret:
-   - Name: `CACHIX_AUTH_TOKEN`
-   - Value: Your Cachix token
+- `cache.nixos.org`
+- `nix-community.cachix.org`
 
-6. **Update the cache name in workflows**: Replace `asthenia` with your cache name in these files:
-   - `.github/workflows/nixos-build.yml`
-   - `.github/workflows/darwin-build.yml`
-   - `.github/workflows/home-manager-linux.yml`
-   - `.github/workflows/home-manager-darwin.yml`
+**Step 3: Create an Auth Token**
 
-   Find this block in each file and update the `name` field:
-   ```yaml
-   - name: Setup Cachix
-     uses: cachix/cachix-action@v15
-     with:
-       name: your-cache-name  # Change this
-       authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-   ```
+1. Go to [Personal Auth Tokens](https://app.cachix.org/personal-auth-tokens)
+2. Create a new token with **Write** permission
+3. Set expiry to "never" (or rotate periodically if you prefer)
+4. Copy the token - you will only see it once
 
-7. **First run**: The first CI run will be slow (building everything), but it pushes results to your cache. Subsequent runs will be much faster.
+**Step 4: Add Token to GitHub**
 
-### Using Your Cache Locally
+1. Go to your repo on GitHub
+2. Settings → Secrets and variables → Actions
+3. Click "New repository secret"
+4. Name: `CACHIX_AUTH_TOKEN`
+5. Value: paste your Cachix token
 
-After CI populates your cache, you can use it locally for faster rebuilds:
+**Step 5: Update Workflow Files**
+
+Replace `asthenia` with your cache name in all workflow files:
+
+- `.github/workflows/nixos-build.yml`
+- `.github/workflows/darwin-build.yml`
+- `.github/workflows/home-manager-linux.yml`
+- `.github/workflows/home-manager-darwin.yml`
+- `.github/workflows/update-flake.yml`
+
+Find this block in each file:
+```yaml
+- name: Setup Cachix
+  uses: cachix/cachix-action@v15
+  with:
+    name: your-cache-name  # Change this
+    authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    extraPullNames: nix-community
+```
+
+The `extraPullNames: nix-community` line tells CI to also check nix-community.cachix.org for pre-built packages. This is important for packages like niri-unstable that are maintained by the community.
+
+**Step 6: Configure Your Local Machines**
+
+Add your Cachix cache to your NixOS or nix-darwin configuration so local builds also benefit from CI-built packages.
+
+For NixOS (`system/configuration.nix`):
+```nix
+nix.settings = {
+  substituters = [
+    "https://cache.nixos.org"
+    "https://nix-community.cachix.org"
+    "https://your-cache-name.cachix.org"
+  ];
+  trusted-public-keys = [
+    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    "your-cache-name.cachix.org-1:YOUR_PUBLIC_KEY_HERE"
+  ];
+};
+```
+
+Get your cache's public key from your Cachix dashboard.
+
+For nix-darwin, add the same settings to your darwin configuration.
+
+**Step 7: First Run**
+
+The first CI run will be slow because it builds everything from scratch. After that, subsequent runs pull from cache and only rebuild what changed.
+
+### Setting Up Continuous Deployment (Optional)
+
+The CD pipeline automatically deploys changes to your machines after CI passes. It uses Tailscale for secure connectivity - your machines do not need public IPs or exposed ports.
+
+**Prerequisites**
+- A Tailscale account ([tailscale.com](https://tailscale.com))
+- Your machines connected to your Tailscale network
+- Tailscale IPs for each machine (find in Tailscale admin console)
+
+**Step 1: Create SSH Keys for CI**
+
+Generate a dedicated SSH keypair for GitHub Actions:
 
 ```bash
-# One-time setup
-cachix use your-cache-name
-
-# Now rebuilds will pull from your cache
-nixos-rebuild switch --flake .#arasaka
-home-manager switch --flake .#niri
+ssh-keygen -t ed25519 -C "github-actions-cd" -f ~/.ssh/github-actions-cd
 ```
+
+This creates two files:
+- `~/.ssh/github-actions-cd` (private key - goes to GitHub secrets)
+- `~/.ssh/github-actions-cd.pub` (public key - goes to your machines)
+
+**Step 2: Add Public Key to Your Machines**
+
+Add the public key to authorized_keys on each machine you want to deploy to.
+
+For NixOS (`system/configuration.nix`):
+```nix
+users.users.your-username = {
+  openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAA... github-actions-cd"
+  ];
+};
+```
+
+For Home Manager (works on both platforms, `home/shared/secrets.nix`):
+```nix
+home.file.".ssh/authorized_keys" = {
+  text = ''
+    ssh-ed25519 AAAA... github-actions-cd
+  '';
+};
+```
+
+Rebuild your system to apply the changes.
+
+**Step 3: Add Private Key to GitHub**
+
+1. Go to your repo → Settings → Secrets and variables → Actions
+2. New repository secret:
+   - Name: `CD_SSH_PRIVATE_KEY`
+   - Value: contents of `~/.ssh/github-actions-cd` (the private key file)
+
+**Step 4: Create Tailscale Auth Keys**
+
+You need an **ephemeral** auth key for CI runners (they connect temporarily for each deployment).
+
+1. Go to [Tailscale Admin Console](https://login.tailscale.com/admin/settings/keys)
+2. Generate auth key with these settings:
+   - Reusable: Yes
+   - Ephemeral: Yes (important - runners should not persist in your network)
+   - Tags: optional, for access control
+3. Copy the key
+
+**Step 5: Add Tailscale Key to GitHub**
+
+1. Go to your repo → Settings → Secrets and variables → Actions
+2. New repository secret:
+   - Name: `TAILSCALE_AUTH_KEY`
+   - Value: your Tailscale auth key
+
+**Step 6: Update Deploy Workflow**
+
+Edit `.github/workflows/deploy.yml` with your machine details:
+
+```yaml
+env:
+  MACHINE1_IP: "100.x.x.x"  # Tailscale IP of first machine
+  MACHINE2_IP: "100.x.x.x"  # Tailscale IP of second machine
+
+jobs:
+  deploy-machine1:
+    steps:
+      - name: Deploy
+        run: |
+          ssh user@${{ env.MACHINE1_IP }} << 'EOF'
+            cd ~/.config/asthenia
+            git pull
+            sudo nixos-rebuild switch --flake .#machine1
+            home-manager switch --flake .#profile
+          EOF
+```
+
+**Step 7: Test the Pipeline**
+
+1. Make a small change and push to main
+2. Watch the build workflows complete
+3. The deploy workflow should trigger automatically
+4. Check your machine - the changes should be applied
+
+### Tailscale Auto-Join for Machines (Optional)
+
+You can configure your machines to automatically join your Tailscale network on boot using sops-nix for secure key storage.
+
+**Step 1: Create a Non-Ephemeral Auth Key**
+
+Unlike CI runners, your machines should persist in your Tailscale network:
+
+1. Go to Tailscale Admin Console
+2. Generate auth key:
+   - Reusable: Yes (allows re-auth after reboots)
+   - Ephemeral: No (machine persists)
+3. Copy the key
+
+**Step 2: Add Key to Sops Secrets**
+
+```bash
+cd ~/.config/asthenia
+sops secrets/secrets.yaml
+```
+
+Add the key:
+```yaml
+tailscale_auth_key: tskey-auth-xxxxx
+```
+
+**Step 3: Configure NixOS**
+
+In `system/configuration.nix`:
+```nix
+services.tailscale = {
+  enable = true;
+  authKeyFile = "/run/secrets/tailscale_auth_key";
+};
+
+sops.secrets.tailscale_auth_key = {};
+```
+
+In `outputs/os.nix`, ensure sops-nix module is imported:
+```nix
+modules' = [
+  ../system/configuration.nix
+  inputs.sops-nix.nixosModules.sops
+  # ...
+];
+```
+
+After rebuilding, your machine will automatically authenticate with Tailscale on boot.
+
+### Weekly Flake Update Workflow
+
+The `update-flake.yml` workflow runs every Monday and:
+
+1. Updates `flake.lock` with latest versions of all inputs
+2. Creates a pull request with the changes
+3. Builds ALL configurations (NixOS, Darwin, Home Manager) in parallel
+4. Pushes all build results to your Cachix cache
+
+This "cache warming" means that when you merge the PR and rebuild locally, everything is already cached. Your local rebuild downloads pre-built packages instead of compiling.
+
+To trigger manually: Actions → flake.lock Update → Run workflow
 
 ### CI Without Cachix
 
-If you don't want to set up Cachix, CI will still work - builds just take longer since they rebuild everything each time. The workflows use GitHub's built-in caching (`magic-nix-cache-action`) which provides some speedup, but it's not as effective as Cachix for Nix builds.
+If you do not want to set up Cachix, CI still works - builds just take longer since they rebuild everything each time. The workflows use GitHub's built-in caching (`magic-nix-cache-action`) which provides some speedup within a single workflow run, but packages are not persisted across runs or shared with your local machine.
+
+### Cachix Free Tier Limits
+
+The Cachix free tier provides:
+- 10 GB storage
+- Unlimited bandwidth
+- LRU eviction (oldest unused packages removed when full)
+
+For most personal configurations, 10 GB is sufficient. Large packages like NVIDIA drivers and Rust programs (niri) take up the most space. If you hit the limit, Cachix automatically removes the least recently used packages to make room.
+
+### Troubleshooting CI/CD
+
+**Build fails with disk space error**
+
+The workflows include a disk cleanup step that removes unnecessary software from GitHub runners. If you still hit space limits, your build output may be too large for the runner.
+
+**Cachix push fails or times out**
+
+- Verify `CACHIX_AUTH_TOKEN` is set correctly in GitHub secrets
+- Check that your token has Write permission
+- Large closures can take time to upload - the workflow has generous timeouts
+
+**Deploy fails to connect**
+
+- Verify Tailscale auth key is valid (they can expire)
+- Check that your machine is online and connected to Tailscale
+- Verify the SSH public key is in authorized_keys on the target machine
+- Check that the Tailscale IP in the workflow matches your machine
+
+**Packages still building from source**
+
+- Ensure `extraPullNames: nix-community` is in your cachix-action config
+- Verify your local nix.settings includes nix-community.cachix.org
+- Some packages may have different derivation hashes due to build flags or input versions - these will be cached after the first build
 
 ## Customization
 
