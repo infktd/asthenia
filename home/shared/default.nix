@@ -69,7 +69,6 @@
   commonPackages = with pkgs; [
     # --- Applications ---
     obsidian # Note-taking app
-    signal-desktop # Secure messaging
 
     # --- Development Tools ---
     claude-code # Claude AI code assistant
@@ -101,6 +100,7 @@
   linuxPackages = with pkgs; [
     # --- Applications (Linux-specific or better on Linux) ---
     bolt-launcher # Launcher application
+    signal-desktop # Secure messaging (Linux-only)
     vlc # Media player
     yubioath-flutter # Yubikey authenticator
 

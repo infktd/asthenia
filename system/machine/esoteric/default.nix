@@ -61,32 +61,27 @@
   };
 
   # === NIX ===
-  # Nix daemon and package manager settings
-  nix = {
-    # Enable flakes and new nix command
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
+  # Disable nix-darwin's Nix management - Determinate Nix handles the daemon
+  # Determinate already manages: flakes, garbage collection, store optimization
+  # Configure Determinate settings via: /etc/nix/nix.conf or determinate-nixd
+  nix.enable = false;
 
-    # Automatic garbage collection
-    gc = {
-      automatic = true;
-      interval = { Weekday = 0; Hour = 2; Minute = 0; };  # Weekly on Sunday at 2am
-      options = "--delete-older-than 30d";
-    };
+  # Nix settings (still applied even with Determinate Nix managing the daemon)
+  nix.settings = {
+    # Trust the main user to use substituters and other restricted settings
+    trusted-users = [ "root" "jayne" ];
 
-    # Optimize store automatically
-    optimise = {
-      automatic = true;
-    };
-
-    settings = {
-      # Allow unfree packages
-      allowed-users = [ "@admin" ];
-
-      # Trusted users who can configure binary caches
-      trusted-users = [ "root" "jayne" ];
-    };
+    # Additional binary caches for faster builds
+    substituters = [
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
+      "https://devenv.cachix.org"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+    ];
   };
 
   # === PROGRAMS ===
