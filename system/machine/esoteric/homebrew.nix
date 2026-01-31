@@ -52,9 +52,8 @@
     # TAPS
     # ---------------------------------------------------------------------------
     # Additional Homebrew repositories
+    # Note: homebrew/bundle and homebrew/services are now built into core Homebrew
     taps = [
-      "homebrew/bundle"
-      "homebrew/services"
     ];
 
     # ---------------------------------------------------------------------------

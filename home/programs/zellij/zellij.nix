@@ -27,10 +27,10 @@
   programs.zellij = {
     enable = true;
 
-    # Enable shell integration
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableFishIntegration = true;
+    # Shell integration disabled - auto-starts zellij on every terminal
+    enableBashIntegration = false;
+    enableZshIntegration = false;
+    enableFishIntegration = false;
   };
 
   # ---------------------------------------------------------------------------
