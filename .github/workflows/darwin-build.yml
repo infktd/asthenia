@@ -1,4 +1,4 @@
-name: NixOS Build Check
+name: Darwin Build Check
 
 on:
   workflow_dispatch:
@@ -7,10 +7,9 @@ on:
       - main
       - flake-lock-update
     paths:
-      - 'system/machine/arasaka/**'
+      - 'system/machine/esoteric/**'
       - 'system/configuration.nix'
       - 'system/fonts/**'
-      - 'system/wm/**'
       - 'flake.nix'
       - 'flake.lock'
   pull_request:
@@ -18,35 +17,23 @@ on:
       - main
       - flake-lock-update
     paths:
-      - 'system/machine/arasaka/**'
+      - 'system/machine/esoteric/**'
       - 'system/configuration.nix'
       - 'system/fonts/**'
-      - 'system/wm/**'
       - 'flake.nix'
       - 'flake.lock'
 
 jobs:
-  build-nixos:
-    name: build-nixos-${{ matrix.host }}
-    runs-on: ubuntu-latest
+  build-darwin:
+    name: build-darwin-${{ matrix.host }}
+    runs-on: macos-latest
     strategy:
       matrix:
         host:
-          - arasaka
+          - esoteric
       fail-fast: false
 
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -66,13 +53,13 @@ jobs:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Build NixOS configuration for ${{ matrix.host }}
+      - name: Build Darwin configuration for ${{ matrix.host }}
         run: |
-          nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
+          nix build .#darwinConfigurations.${{ matrix.host }}.system \
             --print-build-logs \
             --show-trace
 
       - name: Check derivation info
         if: success()
         run: |
-          nix path-info .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+          nix path-info .#darwinConfigurations.${{ matrix.host }}.system

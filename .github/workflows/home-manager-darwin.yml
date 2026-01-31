@@ -1,4 +1,4 @@
-name: NixOS Build Check
+name: Home Manager Darwin Build
 
 on:
   workflow_dispatch:
@@ -7,10 +7,11 @@ on:
       - main
       - flake-lock-update
     paths:
-      - 'system/machine/arasaka/**'
-      - 'system/configuration.nix'
-      - 'system/fonts/**'
-      - 'system/wm/**'
+      - 'home/shared/**'
+      - 'home/themes/**'
+      - 'home/programs/**'
+      - 'home/scripts/**'
+      - 'home/wm/aerospace/**'
       - 'flake.nix'
       - 'flake.lock'
   pull_request:
@@ -18,35 +19,24 @@ on:
       - main
       - flake-lock-update
     paths:
-      - 'system/machine/arasaka/**'
-      - 'system/configuration.nix'
-      - 'system/fonts/**'
-      - 'system/wm/**'
+      - 'home/shared/**'
+      - 'home/themes/**'
+      - 'home/programs/**'
+      - 'home/scripts/**'
+      - 'home/wm/aerospace/**'
       - 'flake.nix'
       - 'flake.lock'
 
 jobs:
-  build-nixos:
-    name: build-nixos-${{ matrix.host }}
-    runs-on: ubuntu-latest
+  build-home-darwin:
+    name: build-home-${{ matrix.profile }}
+    runs-on: macos-latest
     strategy:
       matrix:
-        host:
-          - arasaka
+        profile: [default-darwin, aerospace]
       fail-fast: false
 
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -66,13 +56,13 @@ jobs:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Build NixOS configuration for ${{ matrix.host }}
+      - name: Build Home Manager profile
         run: |
-          nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
+          nix build .#homeConfigurations.${{ matrix.profile }}.activationPackage \
             --print-build-logs \
             --show-trace
 
       - name: Check derivation info
         if: success()
         run: |
-          nix path-info .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+          nix path-info .#homeConfigurations.${{ matrix.profile }}.activationPackage

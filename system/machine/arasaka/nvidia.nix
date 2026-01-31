@@ -54,10 +54,9 @@
     # Access via: nvidia-settings
     nvidiaSettings = true;
     
-    # Use beta driver for latest features
-    # Beta drivers have better Wayland support
+    # Use stable driver for reliability
     # Options: stable, beta, production, latest
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
     
     # Force full composition pipeline
     # Reduces tearing and improves Wayland performance
