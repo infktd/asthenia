@@ -70,7 +70,7 @@ jobs:
       - name: Deploy to arasaka
         run: |
           # Deploy using Tailscale SSH (uses machine name, not IP)
-          tailscale ssh infktd@arasaka << 'EOF'
+          tailscale ssh --accept-risk=lose-ssh infktd@arasaka << 'EOF'
             cd ~/.config/asthenia
             git pull
             sudo nixos-rebuild switch --flake .#arasaka
@@ -117,7 +117,7 @@ jobs:
       - name: Deploy to esoteric
         run: |
           # Deploy using Tailscale SSH (uses machine name, not IP)
-          tailscale ssh jayne@esoteric << 'EOF'
+          tailscale ssh --accept-risk=lose-ssh jayne@esoteric << 'EOF'
             cd ~/.config/asthenia
             git pull
             darwin-rebuild switch --flake .#esoteric
