@@ -2,16 +2,6 @@ name: NixOS Build Check
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'system/machine/arasaka/**'
-      - 'system/configuration.nix'
-      - 'system/fonts/**'
-      - 'system/wm/**'
-      - 'flake.nix'
-      - 'flake.lock'
   pull_request:
     branches:
       - main
@@ -22,6 +12,7 @@ on:
       - 'system/wm/**'
       - 'flake.nix'
       - 'flake.lock'
+      - 'outputs/os.nix'
 
 jobs:
   build-nixos:

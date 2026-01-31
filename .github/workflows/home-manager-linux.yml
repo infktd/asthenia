@@ -2,17 +2,6 @@ name: Home Manager Linux Build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'home/shared/**'
-      - 'home/themes/**'
-      - 'home/programs/**'
-      - 'home/scripts/**'
-      - 'home/wm/niri/**'
-      - 'flake.nix'
-      - 'flake.lock'
   pull_request:
     branches:
       - main
@@ -24,6 +13,7 @@ on:
       - 'home/wm/niri/**'
       - 'flake.nix'
       - 'flake.lock'
+      - 'outputs/hm.nix'
 
 jobs:
   build-home-linux:

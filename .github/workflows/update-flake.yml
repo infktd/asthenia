@@ -236,3 +236,24 @@ jobs:
       - name: Push to Cachix
         run: |
           cachix push asthenia ./result
+
+  # =============================================================================
+  # AUTO-MERGE IF ALL BUILDS PASS
+  # =============================================================================
+  auto-merge:
+    needs: [update-flake-lock, build-nixos, build-darwin, build-home-linux, build-home-darwin]
+    runs-on: ubuntu-latest
+    if: ${{ needs.update-flake-lock.outputs.pr_created }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Merge PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ needs.update-flake-lock.outputs.pr_created }} --squash --delete-branch

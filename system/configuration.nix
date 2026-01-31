@@ -61,8 +61,6 @@ in
     enable = true;
     allowedTCPPorts = [ ];
     allowedUDPPorts = [ ];
-    # Only allow SSH over Tailscale - not exposed to public internet
-    interfaces."tailscale0".allowedTCPPorts = [ 22 ];
   };
   networking.hostName = "arasaka";
   networking.networkmanager.enable = true;
@@ -132,7 +130,6 @@ in
   services.tailscale = {
     enable = true;
     authKeyFile = "/run/secrets/tailscale_auth_key";
-    extraUpFlags = [ "--ssh" ];
   };
 
   # === SOPS ===
@@ -154,10 +151,6 @@ in
     extraGroups = [ "networkmanager" "wheel" "video" "render" "docker" ];
     isNormalUser = true;
     shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = [
-      # GitHub Actions CD key
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPKJDMqqnw2+q83PRh8n2ZZucRA1jw+WgIxLB6dhytzk github-actions-cd"
-    ];
   };
 
   # === VIRTUALISATION ===

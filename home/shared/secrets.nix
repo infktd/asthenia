@@ -82,17 +82,6 @@ in
     '';
   };
 
-  # SSH authorized keys (allows incoming connections from these keys)
-  home.file.".ssh/authorized_keys" = {
-    text = ''
-      # GitHub Actions CD key
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPKJDMqqnw2+q83PRh8n2ZZucRA1jw+WgIxLB6dhytzk github-actions-cd
-    '';
-    onChange = ''
-      chmod 600 ${homeDir}/.ssh/authorized_keys
-    '';
-  };
-
   # ---------------------------------------------------------------------------
   # GPG KEY IMPORT
   # ---------------------------------------------------------------------------

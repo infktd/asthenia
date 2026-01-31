@@ -441,15 +441,15 @@ sudo nixos-rebuild switch --flake .#arasaka
 home-manager switch --flake .#niri
 ```
 
-## CI/CD
+## CI
 
-This repository includes a complete CI/CD pipeline using GitHub Actions. The system automatically validates builds, caches compiled packages, and can deploy changes to your machines over a secure network.
+This repository includes GitHub Actions workflows for continuous integration and cache warming. CI validates builds and caches compiled packages so local rebuilds are fast.
 
 ### Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           CI/CD PIPELINE                                     │
+│                              CI PIPELINE                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                │
@@ -457,26 +457,23 @@ This repository includes a complete CI/CD pipeline using GitHub Actions. The sys
 │   │              │     │              │     │              │                │
 │   │  • Push      │────>│  • NixOS     │────>│  • Cachix    │                │
 │   │  • PR        │     │  • Darwin    │     │  (personal)  │                │
-│   │  • Manual    │     │  • Home Mgr  │     │              │                │
-│   │  • Schedule  │     │              │     │  • nix-comm  │                │
-│   └──────────────┘     └──────────────┘     │  (upstream)  │                │
+│   │  • Schedule  │     │  • Home Mgr  │     │              │                │
+│   └──────────────┘     └──────────────┘     │  • nix-comm  │                │
+│                                              │  (upstream)  │                │
 │                                              └──────────────┘                │
 │                                                     │                        │
 │                                                     v                        │
-│   ┌──────────────────────────────────────────────────────────────────┐      │
-│   │                         DEPLOYMENT                                │      │
-│   │                                                                   │      │
-│   │   GitHub Runner ──(Tailscale VPN)──> Your Machines               │      │
-│   │                                                                   │      │
-│   │   • Secure SSH over encrypted tunnel                             │      │
-│   │   • No exposed ports or public IPs needed                        │      │
-│   │   • Pulls from cache, applies config                             │      │
-│   └──────────────────────────────────────────────────────────────────┘      │
+│                                              ┌──────────────┐                │
+│                                              │ LOCAL BUILDS │                │
+│                                              │              │                │
+│                                              │ Pull cached  │                │
+│                                              │ packages     │                │
+│                                              └──────────────┘                │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Why CI/CD for NixOS?
+### Why CI for NixOS?
 
 **Catch Breaks Early**
 - Every push verifies your config actually builds
@@ -491,33 +488,27 @@ This repository includes a complete CI/CD pipeline using GitHub Actions. The sys
 **Faster Local Rebuilds with Cachix**
 - CI builds packages and pushes to your personal binary cache
 - Your local machine pulls pre-built packages instead of compiling
-- Large packages like NVIDIA drivers, Rust programs (niri), and custom builds are cached
+- Large packages like Rust programs (niri) and custom builds are cached
 - Turns 30-minute rebuilds into 2-minute downloads
 
 **Cache Warming with Flake Updates**
 - Weekly flake update workflow builds ALL configurations after updating
-- By the time you merge the update, everything is pre-built in your cache
-- Your local rebuild after merging is near-instant
-
-**Automated Deployment**
-- Changes can be automatically deployed to your machines after CI passes
-- Uses Tailscale for secure connectivity - no public IPs or port forwarding
-- SSH-based deployment with dedicated CI keys
+- Auto-merges if all builds pass
+- By the time you rebuild locally, everything is pre-built in your cache
 
 ### Workflows
 
 | Workflow | Triggers On | Purpose |
 |----------|-------------|---------|
-| `nixos-build.yml` | arasaka system files, flake changes | Build and cache NixOS configuration |
-| `darwin-build.yml` | esoteric system files, flake changes | Build and cache nix-darwin configuration |
-| `home-manager-linux.yml` | Linux home files, flake changes | Build and cache Home Manager (default, niri) |
-| `home-manager-darwin.yml` | Darwin home files, flake changes | Build and cache Home Manager (default-darwin, aerospace) |
-| `update-flake.yml` | Weekly (Monday) or manual | Update flake.lock and pre-warm all caches |
-| `deploy.yml` | After successful builds or manual | Deploy to machines via Tailscale SSH |
-| `flake-check.yml` | All pushes/PRs | Run `nix flake check` |
-| `format-check.yml` | All pushes/PRs | Check Alejandra formatting |
+| `update-flake.yml` | Weekly (Monday) or manual | Update flake.lock, build all configs, auto-merge if passing |
+| `nixos-build.yml` | PR to main with NixOS changes | Validate NixOS builds |
+| `darwin-build.yml` | PR to main with Darwin changes | Validate nix-darwin builds |
+| `home-manager-linux.yml` | PR to main with Linux home changes | Validate Home Manager Linux builds |
+| `home-manager-darwin.yml` | PR to main with Darwin home changes | Validate Home Manager Darwin builds |
+| `flake-check.yml` | All PRs | Run `nix flake check` |
+| `format-check.yml` | All PRs | Check Alejandra formatting |
 
-All workflows can be triggered manually via the GitHub Actions UI (Actions tab, select workflow, "Run workflow").
+All workflows can be triggered manually via the GitHub Actions UI.
 
 ### How Caching Works
 
@@ -632,154 +623,6 @@ For nix-darwin, add the same settings to your darwin configuration.
 
 The first CI run will be slow because it builds everything from scratch. After that, subsequent runs pull from cache and only rebuild what changed.
 
-### Setting Up Continuous Deployment (Optional)
-
-The CD pipeline automatically deploys changes to your machines after CI passes. It uses Tailscale for secure connectivity - your machines do not need public IPs or exposed ports.
-
-**Prerequisites**
-- A Tailscale account ([tailscale.com](https://tailscale.com))
-- Your machines connected to your Tailscale network
-- Tailscale IPs for each machine (find in Tailscale admin console)
-
-**Step 1: Create SSH Keys for CI**
-
-Generate a dedicated SSH keypair for GitHub Actions:
-
-```bash
-ssh-keygen -t ed25519 -C "github-actions-cd" -f ~/.ssh/github-actions-cd
-```
-
-This creates two files:
-- `~/.ssh/github-actions-cd` (private key - goes to GitHub secrets)
-- `~/.ssh/github-actions-cd.pub` (public key - goes to your machines)
-
-**Step 2: Add Public Key to Your Machines**
-
-Add the public key to authorized_keys on each machine you want to deploy to.
-
-For NixOS (`system/configuration.nix`):
-```nix
-users.users.your-username = {
-  openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAA... github-actions-cd"
-  ];
-};
-```
-
-For Home Manager (works on both platforms, `home/shared/secrets.nix`):
-```nix
-home.file.".ssh/authorized_keys" = {
-  text = ''
-    ssh-ed25519 AAAA... github-actions-cd
-  '';
-};
-```
-
-Rebuild your system to apply the changes.
-
-**Step 3: Add Private Key to GitHub**
-
-1. Go to your repo → Settings → Secrets and variables → Actions
-2. New repository secret:
-   - Name: `CD_SSH_PRIVATE_KEY`
-   - Value: contents of `~/.ssh/github-actions-cd` (the private key file)
-
-**Step 4: Create Tailscale Auth Keys**
-
-You need an **ephemeral** auth key for CI runners (they connect temporarily for each deployment).
-
-1. Go to [Tailscale Admin Console](https://login.tailscale.com/admin/settings/keys)
-2. Generate auth key with these settings:
-   - Reusable: Yes
-   - Ephemeral: Yes (important - runners should not persist in your network)
-   - Tags: optional, for access control
-3. Copy the key
-
-**Step 5: Add Tailscale Key to GitHub**
-
-1. Go to your repo → Settings → Secrets and variables → Actions
-2. New repository secret:
-   - Name: `TAILSCALE_AUTH_KEY`
-   - Value: your Tailscale auth key
-
-**Step 6: Update Deploy Workflow**
-
-Edit `.github/workflows/deploy.yml` with your machine details:
-
-```yaml
-env:
-  MACHINE1_IP: "100.x.x.x"  # Tailscale IP of first machine
-  MACHINE2_IP: "100.x.x.x"  # Tailscale IP of second machine
-
-jobs:
-  deploy-machine1:
-    steps:
-      - name: Deploy
-        run: |
-          ssh user@${{ env.MACHINE1_IP }} << 'EOF'
-            cd ~/.config/asthenia
-            git pull
-            sudo nixos-rebuild switch --flake .#machine1
-            home-manager switch --flake .#profile
-          EOF
-```
-
-**Step 7: Test the Pipeline**
-
-1. Make a small change and push to main
-2. Watch the build workflows complete
-3. The deploy workflow should trigger automatically
-4. Check your machine - the changes should be applied
-
-### Tailscale Auto-Join for Machines (Optional)
-
-You can configure your machines to automatically join your Tailscale network on boot using sops-nix for secure key storage.
-
-**Step 1: Create a Non-Ephemeral Auth Key**
-
-Unlike CI runners, your machines should persist in your Tailscale network:
-
-1. Go to Tailscale Admin Console
-2. Generate auth key:
-   - Reusable: Yes (allows re-auth after reboots)
-   - Ephemeral: No (machine persists)
-3. Copy the key
-
-**Step 2: Add Key to Sops Secrets**
-
-```bash
-cd ~/.config/asthenia
-sops secrets/secrets.yaml
-```
-
-Add the key:
-```yaml
-tailscale_auth_key: tskey-auth-xxxxx
-```
-
-**Step 3: Configure NixOS**
-
-In `system/configuration.nix`:
-```nix
-services.tailscale = {
-  enable = true;
-  authKeyFile = "/run/secrets/tailscale_auth_key";
-};
-
-sops.secrets.tailscale_auth_key = {};
-```
-
-In `outputs/os.nix`, ensure sops-nix module is imported:
-```nix
-modules' = [
-  ../system/configuration.nix
-  inputs.sops-nix.nixosModules.sops
-  # ...
-];
-```
-
-After rebuilding, your machine will automatically authenticate with Tailscale on boot.
-
 ### Weekly Flake Update Workflow
 
 The `update-flake.yml` workflow runs every Monday and:
@@ -788,8 +631,9 @@ The `update-flake.yml` workflow runs every Monday and:
 2. Creates a pull request with the changes
 3. Builds ALL configurations (NixOS, Darwin, Home Manager) in parallel
 4. Pushes all build results to your Cachix cache
+5. Auto-merges the PR if all builds pass
 
-This "cache warming" means that when you merge the PR and rebuild locally, everything is already cached. Your local rebuild downloads pre-built packages instead of compiling.
+This "cache warming" means that by the time you rebuild locally, everything is already cached. Your local rebuild downloads pre-built packages instead of compiling.
 
 To trigger manually: Actions → flake.lock Update → Run workflow
 
@@ -806,7 +650,7 @@ The Cachix free tier provides:
 
 For most personal configurations, 10 GB is sufficient. Large packages like NVIDIA drivers and Rust programs (niri) take up the most space. If you hit the limit, Cachix automatically removes the least recently used packages to make room.
 
-### Troubleshooting CI/CD
+### Troubleshooting CI
 
 **Build fails with disk space error**
 
@@ -817,13 +661,6 @@ The workflows include a disk cleanup step that removes unnecessary software from
 - Verify `CACHIX_AUTH_TOKEN` is set correctly in GitHub secrets
 - Check that your token has Write permission
 - Large closures can take time to upload - the workflow has generous timeouts
-
-**Deploy fails to connect**
-
-- Verify Tailscale auth key is valid (they can expire)
-- Check that your machine is online and connected to Tailscale
-- Verify the SSH public key is in authorized_keys on the target machine
-- Check that the Tailscale IP in the workflow matches your machine
 
 **Packages still building from source**
 

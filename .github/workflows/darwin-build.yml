@@ -2,24 +2,14 @@ name: Darwin Build Check
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'system/machine/esoteric/**'
-      - 'system/configuration.nix'
-      - 'system/fonts/**'
-      - 'flake.nix'
-      - 'flake.lock'
   pull_request:
     branches:
       - main
     paths:
       - 'system/machine/esoteric/**'
-      - 'system/configuration.nix'
-      - 'system/fonts/**'
       - 'flake.nix'
       - 'flake.lock'
+      - 'outputs/darwin.nix'
 
 jobs:
   build-darwin:
