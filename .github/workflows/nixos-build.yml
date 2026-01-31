@@ -1,8 +1,9 @@
 name: NixOS Build Check
 
 on:
+  workflow_dispatch:
   push:
-    branches: 
+    branches:
       - main
       - flake-lock-update
     paths:
