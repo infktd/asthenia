@@ -47,7 +47,10 @@ let
   modules' = [
     # Pin nixpkgs registry to our flake input version
     { nix.registry.nixpkgs.flake = inputs.nixpkgs; }
-    
+
+    # sops-nix home-manager module for secrets management
+    inputs.sops-nix.homeManagerModules.sops
+
     # Allow additional modules to be injected from caller
     extraHomeConfig
   ];

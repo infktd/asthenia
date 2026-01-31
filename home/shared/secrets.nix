@@ -10,10 +10,13 @@
 # - Symlinks point from target locations (e.g., ~/.ssh/id_ed25519) to decrypted files
 #
 # SETUP (one-time per machine):
-# 1. Generate age key: age-keygen -o ~/.config/sops/age/keys.txt
-# 2. Get public key: age-keygen -y ~/.config/sops/age/keys.txt
-# 3. Add public key to .sops.yaml
-# 4. Store private key in Bitwarden for new machine setup
+# 1. Copy age private key from vault to ~/.config/sops/age/keys.txt
+# 2. Run home-manager switch (may fail on darwin - this is expected)
+# 3. On darwin only: run home-manager switch again (sops launchd PATH bug)
+#
+# DARWIN NOTE: The sops-nix launchd service has an empty PATH, causing the
+# first activation to fail. The second run works because secrets are already
+# decrypted. This is a known issue with sops-nix on macOS.
 #
 # ADDING NEW SECRETS:
 # 1. Define secret in this file under sops.secrets
