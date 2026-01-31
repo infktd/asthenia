@@ -61,6 +61,9 @@ in
     enable = true;
     allowedTCPPorts = [ ];
     allowedUDPPorts = [ ];
+    # Trust Tailscale interface - allows SSH and other traffic over VPN
+    # This is secure because only authenticated Tailscale nodes can reach these ports
+    trustedInterfaces = [ "tailscale0" ];
   };
   networking.hostName = "arasaka";
   networking.networkmanager.enable = true;
