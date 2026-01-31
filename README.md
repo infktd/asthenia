@@ -11,6 +11,7 @@ A modern, modular Nix configuration for both **NixOS** (Linux) and **nix-darwin*
 - [Configuration Structure](#configuration-structure)
 - [Usage](#usage)
 - [Testing Strategy](#testing-strategy)
+- [CI/CD](#cicd)
 - [Customization](#customization)
 - [Troubleshooting](#troubleshooting)
 
@@ -439,6 +440,108 @@ sudo nixos-rebuild switch --flake .#arasaka
 # 5. Apply user changes
 home-manager switch --flake .#niri
 ```
+
+## CI/CD
+
+This repository includes GitHub Actions workflows for continuous integration. Builds are cached using [Cachix](https://cachix.org) to speed up subsequent runs.
+
+### Why CI/CD for NixOS?
+
+**Catch Breaks Early**
+- Every push verifies your config actually builds
+- Find syntax errors, missing dependencies, or breaking changes before they hit your machine
+- No more "it worked yesterday" surprises
+
+**Cross-Platform Validation**
+- Linux changes are tested on Linux runners
+- macOS changes are tested on macOS runners
+- Ensures both platforms stay in sync and buildable
+
+**Faster Local Rebuilds with Cachix**
+- CI builds packages and pushes to your personal binary cache
+- Your local machine pulls pre-built packages instead of compiling
+- NVIDIA drivers, large packages, and custom builds are cached
+- Turns 30-minute rebuilds into 2-minute downloads
+
+**Confidence to Experiment**
+- Know immediately if a change breaks something
+- Easy to bisect issues by looking at CI history
+- Safe to try new packages or configurations
+
+**Documentation of What Works**
+- Green CI = known working configuration
+- CI history shows what changed and when
+- Useful for rolling back or debugging issues
+
+### Workflows
+
+| Workflow | Triggers On | Builds |
+|----------|-------------|--------|
+| `nixos-build.yml` | `system/machine/arasaka/**`, `system/wm/**`, shared system files | NixOS (arasaka) |
+| `darwin-build.yml` | `system/machine/esoteric/**`, shared system files | nix-darwin (esoteric) |
+| `home-manager-linux.yml` | `home/wm/niri/**`, shared home files | Home Manager (default, niri) |
+| `home-manager-darwin.yml` | `home/wm/aerospace/**`, shared home files | Home Manager (default-darwin, aerospace) |
+| `flake-check.yml` | All pushes/PRs | `nix flake check` |
+| `format-check.yml` | All pushes/PRs | Alejandra formatting |
+| `update-flake.yml` | Weekly (Monday) or manual | Updates `flake.lock` |
+
+All workflows can be triggered manually via the GitHub Actions UI.
+
+### Setting Up CI for Your Fork
+
+If you fork this repo, the basic CI workflows will work automatically - they just verify builds succeed.
+
+### Setting Up Cachix (Recommended)
+
+Cachix dramatically speeds up CI builds by caching built packages. Without it, every CI run rebuilds everything from scratch.
+
+1. **Create a Cachix account**: Go to [cachix.org](https://cachix.org) and sign in with GitHub
+
+2. **Create a cache**: Pick a name (e.g., your username or repo name)
+
+3. **Configure upstream caches** (optional but recommended): In your cache settings, add these to skip uploading packages already cached elsewhere:
+   - `cache.nixos.org`
+   - `nix-community.cachix.org`
+
+4. **Create an auth token**: Go to [Personal Auth Tokens](https://app.cachix.org/personal-auth-tokens) and create a token with Write permission. Set expiry to "never" for CI use.
+
+5. **Add the token to GitHub**: Go to your repo → Settings → Secrets and variables → Actions → New repository secret:
+   - Name: `CACHIX_AUTH_TOKEN`
+   - Value: Your Cachix token
+
+6. **Update the cache name in workflows**: Replace `asthenia` with your cache name in these files:
+   - `.github/workflows/nixos-build.yml`
+   - `.github/workflows/darwin-build.yml`
+   - `.github/workflows/home-manager-linux.yml`
+   - `.github/workflows/home-manager-darwin.yml`
+
+   Find this block in each file and update the `name` field:
+   ```yaml
+   - name: Setup Cachix
+     uses: cachix/cachix-action@v15
+     with:
+       name: your-cache-name  # Change this
+       authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+   ```
+
+7. **First run**: The first CI run will be slow (building everything), but it pushes results to your cache. Subsequent runs will be much faster.
+
+### Using Your Cache Locally
+
+After CI populates your cache, you can use it locally for faster rebuilds:
+
+```bash
+# One-time setup
+cachix use your-cache-name
+
+# Now rebuilds will pull from your cache
+nixos-rebuild switch --flake .#arasaka
+home-manager switch --flake .#niri
+```
+
+### CI Without Cachix
+
+If you don't want to set up Cachix, CI will still work - builds just take longer since they rebuild everything each time. The workflows use GitHub's built-in caching (`magic-nix-cache-action`) which provides some speedup, but it's not as effective as Cachix for Nix builds.
 
 ## Customization
 

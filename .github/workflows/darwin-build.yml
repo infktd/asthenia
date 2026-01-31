@@ -59,6 +59,11 @@ jobs:
             --print-build-logs \
             --show-trace
 
+      - name: Push to Cachix
+        if: success()
+        run: |
+          cachix push asthenia ./result
+
       - name: Check derivation info
         if: success()
         run: |
