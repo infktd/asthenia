@@ -2,7 +2,7 @@
 
 A modern, modular Nix configuration for both **NixOS** (Linux) and **nix-darwin** (macOS), featuring comprehensive Home Manager integration, encrypted secrets management, and a well-organized flake-based setup.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
@@ -14,7 +14,7 @@ A modern, modular Nix configuration for both **NixOS** (Linux) and **nix-darwin*
 - [Customization](#customization)
 - [Troubleshooting](#troubleshooting)
 
-## 🌟 Overview
+## Overview
 
 This configuration implements a complete system setup for both Linux and macOS:
 
@@ -34,16 +34,16 @@ This configuration implements a complete system setup for both Linux and macOS:
 
 ### Key Features
 
-- 🎯 **Modular Design**: Cleanly separated system and user configurations
-- 🔄 **Standalone Home Manager**: User configs independent from system rebuilds
-- 🔐 **Encrypted Secrets**: SSH keys, GPG keys, and tokens managed with sops-nix
-- 🍎 **Cross-Platform**: Single repo for NixOS and macOS machines
-- 🎨 **Comprehensive Theming**: GTK themes, fonts, and consistent styling
-- ⚡ **Performance Optimized**: NVIDIA Wayland tuning (Linux), native macOS integration
-- 🛠️ **Developer Friendly**: Rich development tooling and language support
-- 📦 **Reproducible**: Flake-based for consistent, reproducible builds
+- **Modular Design**: Cleanly separated system and user configurations
+- **Standalone Home Manager**: User configs independent from system rebuilds
+- **Encrypted Secrets**: SSH keys, GPG keys, and tokens managed with sops-nix
+- **Cross-Platform**: Single repo for NixOS and macOS machines
+- **Comprehensive Theming**: GTK themes, fonts, and consistent styling
+- **Performance Optimized**: NVIDIA Wayland tuning (Linux), native macOS integration
+- **Developer Friendly**: Rich development tooling and language support
+- **Reproducible**: Flake-based for consistent, reproducible builds
 
-## 🏗️ Architecture
+## Architecture
 
 ### Configuration Philosophy
 
@@ -87,7 +87,7 @@ This configuration uses **standalone Home Manager** (not the NixOS module) for s
 3. **Per-User Customization**: Different users can have different configs
 4. **Faster Iteration**: Quick config changes for development and testing
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -168,7 +168,7 @@ asthenia --update --switch all
 asthenia --help
 ```
 
-## 🔐 Secrets Management
+## Secrets Management
 
 This configuration uses **sops-nix** with **age encryption** to securely manage secrets across all machines. Secrets are encrypted in the repository and decrypted at activation time.
 
@@ -287,7 +287,7 @@ If you fork this repo, you'll need to set up your own secrets:
 - **No secrets in git history**: Only encrypted blobs are committed
 - **Risk surface**: Only your age private key needs protection (keep it in a password manager with strong 2FA)
 
-## 📁 Configuration Structure
+## Configuration Structure
 
 ```
 .
@@ -347,7 +347,7 @@ If you fork this repo, you'll need to set up your own secrets:
             └── default.nix
 ```
 
-## 💻 Usage
+## Usage
 
 ### System Updates
 
@@ -416,7 +416,7 @@ nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
 nix build .#homeConfigurations.niri.activationPackage
 ```
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Testing After Changes
 
@@ -440,7 +440,7 @@ sudo nixos-rebuild switch --flake .#arasaka
 home-manager switch --flake .#niri
 ```
 
-## 🎨 Customization
+## Customization
 
 ### Adding a New Machine
 
@@ -518,7 +518,7 @@ Edit [`home/themes/default.nix`](home/themes/default.nix) to change:
 - Cursor theme
 - Font settings
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Home Manager Command Not Found
 
@@ -595,14 +595,14 @@ If you experience NVIDIA issues:
    systemctl --user restart dms.service
    ```
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Niri Documentation](https://github.com/YaLTeR/niri)
 - [Flakes Guide](https://nixos.wiki/wiki/Flakes)
 
-## 🤝 Contributing
+## Contributing
 
 When contributing to this configuration:
 
@@ -612,7 +612,7 @@ When contributing to this configuration:
 4. Keep system and user layers properly separated
 5. Update the structure diagram if adding new directories
 
-## 📝 License
+## License
 
 This configuration is provided as-is for personal use. Feel free to fork and adapt to your needs.
 
