@@ -66,6 +66,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build Home Manager profile
         run: |

@@ -52,6 +52,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build Darwin configuration for ${{ matrix.host }}
         run: |

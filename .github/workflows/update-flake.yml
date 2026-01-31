@@ -82,6 +82,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build NixOS configuration
         run: |
@@ -125,6 +126,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build Darwin configuration
         run: |
@@ -179,6 +181,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build Home Manager profile
         run: |
@@ -222,6 +225,7 @@ jobs:
         with:
           name: asthenia
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Build Home Manager profile
         run: |
