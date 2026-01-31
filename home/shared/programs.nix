@@ -37,28 +37,28 @@ let
   # CROSS-PLATFORM IMPORTS
   # ---------------------------------------------------------------------------
   # Programs that work on both Linux and macOS
+  # Nix manages both installation and configuration
   commonImports = [
     # --- Development Tools ---
     ../programs/git/git.nix        # Git version control with user identity
+    ../programs/vscode/vscode.nix  # VS Code editor with extensions
     ../programs/zed-editor/zed-editor.nix  # Zed editor
 
     # --- Shell and Terminal ---
+    ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal
     ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
     ../programs/yazi/yazi.nix      # Terminal file manager
+    ../programs/zellij/zellij.nix  # Terminal workspace manager
   ];
 
   # ---------------------------------------------------------------------------
   # LINUX-ONLY IMPORTS
   # ---------------------------------------------------------------------------
   # Programs that only work on Linux (Wayland, X11, or Linux-specific)
-  # macOS equivalents are typically installed via Homebrew casks
   linuxImports = [
-    ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal (use Homebrew on macOS)
     ../programs/chrome/chrome.nix        # Chromium browser (use Homebrew on macOS)
-    ../programs/discord/discord.nix      # Discord with custom themes (use Homebrew on macOS)
+    ../programs/discord/discord.nix      # Discord with nixcord themes (Linux-specific)
     ../programs/fuzzle/fuzzle.nix        # Wayland application launcher
-    ../programs/vscode/vscode.nix        # VS Code editor (use Homebrew on macOS)
-    ../programs/zellij/zellij.nix        # Terminal workspace manager
   ];
 in
 {

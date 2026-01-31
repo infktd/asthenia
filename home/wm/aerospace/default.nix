@@ -42,12 +42,9 @@ let
   # PACKAGES
   # ---------------------------------------------------------------------------
   # macOS-compatible packages for desktop environment
-  # Note: GUI apps like Alacritty are installed via Homebrew casks
   packages = with pkgs; [
-    # --- Clipboard ---
-    # macOS has pbcopy/pbpaste built-in
-
-    # --- Fonts ---
+    # --- Window Management ---
+    aerospace  # Tiling window manager for macOS
   ] ++ fontPkgs;
 
 in

@@ -67,6 +67,10 @@
 
   # Packages available on all platforms
   commonPackages = with pkgs; [
+    # --- Applications ---
+    obsidian # Note-taking app
+    signal-desktop # Secure messaging
+
     # --- Development Tools ---
     claude-code # Claude AI code assistant
     git # Version control
@@ -95,10 +99,8 @@
 
   # Packages only available on Linux
   linuxPackages = with pkgs; [
-    # --- Applications (GUI - use Homebrew casks on macOS) ---
+    # --- Applications (Linux-specific or better on Linux) ---
     bolt-launcher # Launcher application
-    obsidian # Note-taking app
-    signal-desktop # Secure messaging
     vlc # Media player
     yubioath-flutter # Yubikey authenticator
 
