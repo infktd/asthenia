@@ -1,12 +1,13 @@
-# Asthenia - NixOS Configuration
+# Asthenia - NixOS & nix-darwin Configuration
 
-A modern, modular NixOS configuration featuring the Niri window manager, comprehensive Home Manager integration, and a well-organized flake-based setup.
+A modern, modular Nix configuration for both **NixOS** (Linux) and **nix-darwin** (macOS), featuring comprehensive Home Manager integration, encrypted secrets management, and a well-organized flake-based setup.
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Quick Start](#quick-start)
+- [Secrets Management](#secrets-management)
 - [Configuration Structure](#configuration-structure)
 - [Usage](#usage)
 - [Testing Strategy](#testing-strategy)
@@ -15,20 +16,30 @@ A modern, modular NixOS configuration featuring the Niri window manager, compreh
 
 ## 🌟 Overview
 
-This configuration implements a complete NixOS system with:
+This configuration implements a complete system setup for both Linux and macOS:
 
+### Linux (NixOS - `arasaka`)
 - **Window Manager**: Niri (Wayland compositor with scrollable tiling)
 - **Desktop Environment**: DMS (Dank Material Shell) for system monitoring and widgets
-- **Configuration Management**: Flake-based with Home Manager integration
 - **Hardware Support**: NVIDIA GPU optimization for Wayland
-- **Development Tools**: Full development environment with Neovim (nvf), Git, VSCode
+
+### macOS (nix-darwin - `esoteric`)
+- **Window Manager**: Aerospace (tiling window manager for macOS)
+- **System Integration**: Homebrew casks, macOS defaults, Touch ID for sudo
+
+### Shared
+- **Configuration Management**: Flake-based with standalone Home Manager
+- **Secrets Management**: sops-nix with age encryption (SSH keys, GPG keys, tokens)
+- **Development Tools**: Full development environment with Neovim, Git, VSCode, Zed
 
 ### Key Features
 
 - 🎯 **Modular Design**: Cleanly separated system and user configurations
 - 🔄 **Standalone Home Manager**: User configs independent from system rebuilds
+- 🔐 **Encrypted Secrets**: SSH keys, GPG keys, and tokens managed with sops-nix
+- 🍎 **Cross-Platform**: Single repo for NixOS and macOS machines
 - 🎨 **Comprehensive Theming**: GTK themes, fonts, and consistent styling
-- ⚡ **Performance Optimized**: NVIDIA Wayland tuning and aggressive performance settings
+- ⚡ **Performance Optimized**: NVIDIA Wayland tuning (Linux), native macOS integration
 - 🛠️ **Developer Friendly**: Rich development tooling and language support
 - 📦 **Reproducible**: Flake-based for consistent, reproducible builds
 
@@ -36,32 +47,35 @@ This configuration implements a complete NixOS system with:
 
 ### Configuration Philosophy
 
-The configuration follows a **dual-layer architecture**:
+The configuration follows a **dual-layer architecture** on both platforms:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   SYSTEM LAYER                      │
-│  (NixOS - Root-level, requires sudo)               │
-│                                                      │
-│  • Core OS configuration                            │
-│  • Hardware drivers (NVIDIA)                        │
-│  • System services (greetd, polkit)                 │
-│  • Window manager infrastructure                    │
-│                                                      │
-│  Apply: sudo nixos-rebuild switch --flake .#arasaka │
-└─────────────────────────────────────────────────────┘
-                         ↓
-┌─────────────────────────────────────────────────────┐
-│                   USER LAYER                        │
-│  (Home Manager - User-level, no sudo)              │
-│                                                      │
-│  • Dotfiles and configurations                      │
-│  • User applications                                │
-│  • Themes and appearance                            │
-│  • Development environments                         │
-│                                                      │
-│  Apply: home-manager switch --flake .#niri          │
-└─────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                      SYSTEM LAYER                             │
+│  Linux (NixOS)              │  macOS (nix-darwin)             │
+│  requires sudo              │  requires sudo                  │
+│                             │                                 │
+│  • Core OS config           │  • Nix daemon settings          │
+│  • NVIDIA drivers           │  • Homebrew packages            │
+│  • System services          │  • macOS system defaults        │
+│  • WM infrastructure        │  • Touch ID for sudo            │
+│                             │                                 │
+│  nixos-rebuild switch       │  darwin-rebuild switch          │
+│  --flake .#arasaka          │  --flake .#esoteric             │
+└───────────────────────────────────────────────────────────────┘
+                              ↓
+┌───────────────────────────────────────────────────────────────┐
+│                      USER LAYER                               │
+│  (Home Manager - User-level, no sudo)                         │
+│                                                               │
+│  • Dotfiles and configurations                                │
+│  • User applications and development tools                    │
+│  • Themes and appearance                                      │
+│  • Secrets (SSH keys, GPG keys, tokens via sops-nix)          │
+│                                                               │
+│  Linux: home-manager switch --flake .#niri                    │
+│  macOS: home-manager switch --flake .#aerospace               │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ### Why Standalone Home Manager?
@@ -77,7 +91,8 @@ This configuration uses **standalone Home Manager** (not the NixOS module) for s
 
 ### Prerequisites
 
-- NixOS installed with flakes enabled
+- **Linux**: NixOS installed with flakes enabled
+- **macOS**: Nix installed (Determinate Nix recommended) with flakes enabled
 - Git installed
 - Internet connection for downloading dependencies
 
@@ -85,29 +100,49 @@ This configuration uses **standalone Home Manager** (not the NixOS module) for s
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo> ~/Projects/acidBurn
-   cd ~/Projects/acidBurn
+   git clone git@github.com:infktd/asthenia.git ~/.config/asthenia
+   cd ~/.config/asthenia
    ```
 
-2. **Install system configuration**:
+2. **Set up secrets** (see [Secrets Management](#secrets-management) for details):
+   ```bash
+   mkdir -p ~/.config/sops/age
+   # Add your age private key to ~/.config/sops/age/keys.txt
+   ```
+
+3. **Install system configuration**:
+
+   **Linux (NixOS)**:
    ```bash
    sudo nixos-rebuild switch --flake .#arasaka
    ```
 
-3. **Install Home Manager** (if not already installed):
+   **macOS (nix-darwin)**:
    ```bash
-   nix profile install nixpkgs#home-manager
+   darwin-rebuild switch --flake .#esoteric
    ```
 
 4. **Apply user configuration**:
+
+   **Linux**:
    ```bash
    home-manager switch --flake .#niri
    ```
 
-5. **Reboot** to start the Niri session:
+   **macOS** (run twice on first setup - see [Darwin Note](#setting-up-a-new-machine)):
+   ```bash
+   home-manager switch --flake .#aerospace
+   home-manager switch --flake .#aerospace  # Second run for sops-nix
+   ```
+
+5. **Reboot/restart** to apply all changes:
+
+   **Linux**:
    ```bash
    systemctl reboot
    ```
+
+   **macOS**: Open a new terminal session
 
 ### Using the Asthenia Helper Script
 
@@ -133,44 +168,170 @@ asthenia --update --switch all
 asthenia --help
 ```
 
+## 🔐 Secrets Management
+
+This configuration uses **sops-nix** with **age encryption** to securely manage secrets across all machines. Secrets are encrypted in the repository and decrypted at activation time.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    IN THE REPO                          │
+│  (encrypted, safe to push publicly)                     │
+│                                                          │
+│  • secrets/secrets.yaml  - Encrypted secrets            │
+│  • .sops.yaml            - Age public key config        │
+└─────────────────────────────────────────────────────────┘
+                         ↓ decrypted at activation
+┌─────────────────────────────────────────────────────────┐
+│                  ON YOUR MACHINE                         │
+│  (decrypted, never committed)                           │
+│                                                          │
+│  • ~/.config/sops/age/keys.txt  - Age private key       │
+│  • ~/.ssh/id_ed25519            - SSH key (symlink)     │
+│  • ~/.config/sops-nix/secrets/  - Decrypted secrets     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### What's Managed
+
+| Secret | Decrypted Location | Purpose |
+|--------|-------------------|---------|
+| SSH Private Key | `~/.ssh/id_ed25519` | Git operations, server access |
+| GPG Private Key | GPG keyring | Commit signing |
+| GitHub Token | `gh` CLI auth | GitHub API access |
+
+### Setting Up a New Machine
+
+1. **Get the age private key** from your password manager (Bitwarden, 1Password, etc.)
+
+2. **Create the age key file**:
+   ```bash
+   mkdir -p ~/.config/sops/age
+   # Paste your age private key into this file:
+   # AGE-SECRET-KEY-1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   vim ~/.config/sops/age/keys.txt
+   chmod 600 ~/.config/sops/age/keys.txt
+   ```
+
+3. **Run Home Manager**:
+   ```bash
+   home-manager switch --flake .#<profile>
+   ```
+
+4. **Darwin only**: The first run may fail due to a sops-nix launchd PATH bug. Simply run the command again:
+   ```bash
+   home-manager switch --flake .#<profile>
+   ```
+
+5. **Verify secrets are working**:
+   ```bash
+   # SSH key
+   ssh -T git@github.com
+
+   # GPG key
+   gpg --list-secret-keys
+
+   # GitHub CLI
+   gh auth status
+   ```
+
+### Adding New Secrets
+
+1. **Edit the encrypted secrets file**:
+   ```bash
+   cd ~/.config/asthenia
+   sops secrets/secrets.yaml
+   ```
+   This opens the file decrypted in your editor. Add your secret, save, and close - sops re-encrypts automatically.
+
+2. **Add the secret definition** in `home/shared/secrets.nix`:
+   ```nix
+   sops.secrets.my_new_secret = {
+     path = "${homeDir}/.config/app/secret-file";
+     mode = "0600";
+   };
+   ```
+
+3. **Run home-manager switch** to deploy.
+
+### Forking This Repo
+
+If you fork this repo, you'll need to set up your own secrets:
+
+1. **Generate a new age keypair**:
+   ```bash
+   age-keygen -o ~/.config/sops/age/keys.txt
+   age-keygen -y ~/.config/sops/age/keys.txt  # Shows public key
+   ```
+
+2. **Update `.sops.yaml`** with your age public key:
+   ```yaml
+   keys:
+     - &master age1your_public_key_here
+   ```
+
+3. **Create your secrets file**:
+   ```bash
+   cd ~/.config/asthenia
+   sops secrets/secrets.yaml
+   ```
+   Add your secrets (SSH key, GPG key, tokens, etc.)
+
+4. **Store your age private key** securely in a password manager.
+
+### Security Model
+
+- **Age encryption**: X25519 + ChaCha20-Poly1305 (same crypto as Signal/WireGuard)
+- **Single master key**: One age key decrypts all secrets on all your machines
+- **No secrets in git history**: Only encrypted blobs are committed
+- **Risk surface**: Only your age private key needs protection (keep it in a password manager with strong 2FA)
+
 ## 📁 Configuration Structure
 
 ```
 .
 ├── flake.nix                    # Main flake entry point
+├── .sops.yaml                   # Sops-nix encryption config (age public key)
+├── secrets/                     # Encrypted secrets (safe to commit)
+│   └── secrets.yaml             # Encrypted SSH key, GPG key, tokens
 ├── lib/                         # Shared libraries and utilities
 │   ├── default.nix              # Custom library functions
 │   ├── overlays.nix             # Nixpkgs overlays and builder functions
 │   └── schemas.nix              # Flake schema definitions
 ├── outputs/                     # Flake output builders
 │   ├── hm.nix                   # Home Manager configuration builder
-│   └── os.nix                   # NixOS configuration builder
-├── system/                      # System-level NixOS configuration
-│   ├── configuration.nix        # Base system configuration
+│   ├── os.nix                   # NixOS configuration builder
+│   └── darwin.nix               # nix-darwin configuration builder
+├── system/                      # System-level configuration
+│   ├── configuration.nix        # Base NixOS configuration
 │   ├── fonts/                   # System-wide font packages
 │   ├── machine/                 # Machine-specific configs
-│   │   └── arasaka/             # Per-machine customization
-│   │       ├── default.nix      # Machine imports
-│   │       ├── hardware-configuration.nix  # Hardware config
-│   │       └── nvidia.nix       # NVIDIA driver settings
+│   │   ├── arasaka/             # Linux machine (NixOS)
+│   │   │   ├── default.nix      # Machine imports
+│   │   │   ├── hardware-configuration.nix
+│   │   │   └── nvidia.nix       # NVIDIA driver settings
+│   │   └── esoteric/            # macOS machine (nix-darwin)
+│   │       ├── default.nix      # Darwin system config
+│   │       └── homebrew.nix     # Homebrew casks and formulae
 │   └── wm/                      # Window manager system integration
-│       └── niri.nix             # Niri system services and infrastructure
+│       └── niri.nix             # Niri system services (Linux)
 └── home/                        # User-level Home Manager configuration
     ├── shared/                  # Shared user config (all profiles)
     │   ├── default.nix          # Base user configuration
     │   ├── programs.nix         # Program imports
-    │   └── services.nix         # User services
+    │   ├── services.nix         # User services
+    │   └── secrets.nix          # Sops-nix secrets configuration
     ├── programs/                # Individual program configurations
     │   ├── alacritty/           # Terminal emulator
-    │   ├── chrome/              # Chrome browser
-    │   ├── discord/             # Discord client (nixcord)
-    │   ├── dms/                 # DMS user configuration
-    │   ├── fuzzle/              # Fuzzle app
-    │   ├── git/                 # Git configuration
-    │   ├── nvf/                 # Neovim configuration (nvf)
-    │   ├── obsidian/            # Obsidian notes
+    │   ├── chrome/              # Chrome browser (Linux)
+    │   ├── discord/             # Discord client (Linux, nixcord)
+    │   ├── dms/                 # DMS widgets (Linux)
+    │   ├── fuzzle/              # Application launcher (Linux)
+    │   ├── git/                 # Git + GPG signing configuration
     │   ├── vscode/              # VS Code
     │   ├── yazi/                # File manager
+    │   ├── zellij/              # Terminal multiplexer
     │   └── zsh/                 # Shell configuration
     ├── scripts/                 # Custom user scripts
     │   ├── default.nix          # Script package definitions
@@ -179,28 +340,34 @@ asthenia --help
     │   ├── default.nix          # GTK themes and icons
     │   └── colors.nix           # Color schemes
     └── wm/                      # Window manager user configuration
-        └── niri/                # Niri user settings
-            ├── default.nix      # User-level niri config
-            └── config/          # Niri KDL configuration files
-                ├── config.kdl   # Main config (imports others)
-                ├── input.kdl    # Input device configuration
-                ├── keybindings.kdl  # Keyboard shortcuts
-                ├── layout.kdl   # Window layout rules
-                └── outputs.kdl  # Monitor configuration
+        ├── niri/                # Niri settings (Linux)
+        │   ├── default.nix
+        │   └── config/          # Niri KDL configuration files
+        └── aerospace/           # Aerospace settings (macOS)
+            └── default.nix
 ```
 
 ## 💻 Usage
 
 ### System Updates
 
-**Update system configuration only**:
+**Linux (NixOS)**:
 ```bash
 sudo nixos-rebuild switch --flake .#arasaka
 ```
 
-**Update user configuration only**:
+**macOS (nix-darwin)**:
 ```bash
+darwin-rebuild switch --flake .#esoteric
+```
+
+**User configuration (both platforms)**:
+```bash
+# Linux
 home-manager switch --flake .#niri
+
+# macOS
+home-manager switch --flake .#aerospace
 ```
 
 **Update flake inputs**:
@@ -212,6 +379,7 @@ nix flake update
 
 The configuration provides multiple Home Manager profiles:
 
+#### Linux
 1. **`default`**: Basic user configuration without window manager
    ```bash
    home-manager switch --flake .#default
@@ -220,6 +388,17 @@ The configuration provides multiple Home Manager profiles:
 2. **`niri`**: Full Niri window manager configuration (recommended)
    ```bash
    home-manager switch --flake .#niri
+   ```
+
+#### macOS
+1. **`default-darwin`**: Basic user configuration without window manager
+   ```bash
+   home-manager switch --flake .#default-darwin
+   ```
+
+2. **`aerospace`**: Full Aerospace tiling window manager configuration (recommended)
+   ```bash
+   home-manager switch --flake .#aerospace
    ```
 
 ### Testing Changes
@@ -439,4 +618,8 @@ This configuration is provided as-is for personal use. Feel free to fork and ada
 
 ---
 
-**Note**: This configuration is designed for the `arasaka` machine with specific hardware (NVIDIA GPU). You'll need to adapt hardware-specific settings for your system.
+**Note**: This configuration includes machine-specific settings:
+- **`arasaka`** (Linux): NVIDIA GPU configuration for Wayland
+- **`esoteric`** (macOS): Apple Silicon optimizations
+
+You'll need to adapt hardware-specific settings when adding new machines. See [Customization](#customization) for details.
