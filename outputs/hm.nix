@@ -2,7 +2,7 @@
 # HOME MANAGER CONFIGURATION BUILDER
 # =============================================================================
 # This module creates Home Manager configurations (user-level profiles)
-# Called by pkgs.builders.mkHome in lib/overlays.nix
+# Called by pkgs.builders.mkHome / mkHomeDarwin in lib/overlays.nix
 #
 # STANDALONE HOME MANAGER:
 # This configuration uses standalone Home Manager (not the NixOS module)
@@ -11,6 +11,12 @@
 # - Updates don't require sudo
 # - Independent user/system update cycles
 # - Per-user customization support
+#
+# CROSS-PLATFORM SUPPORT:
+# - isDarwin parameter controls which profiles are generated
+# - Linux profiles: default, niri
+# - macOS profiles: default-darwin, aerospace
+# - Shared modules receive isDarwin for conditional logic
 #
 # PROFILE ARCHITECTURE:
 # - Base modules: Applied to ALL profiles (registry, extra config)
@@ -22,7 +28,7 @@
 # - Switch: home-manager switch --flake .#<profile>
 # - Rollback: home-manager generations
 # =============================================================================
-{ extraHomeConfig, inputs, system, pkgs, ... }:
+{ extraHomeConfig, inputs, system, pkgs, isDarwin ? false, ... }:
 
 let
   # ---------------------------------------------------------------------------
@@ -62,19 +68,19 @@ let
   # HOW IT WORKS:
   # 1. Uses home-manager.lib.homeManagerConfiguration function
   # 2. Combines base modules' with profile-specific mods
-  # 3. Passes special args (inputs) for use in imported modules
+  # 3. Passes special args (inputs, isDarwin) for use in imported modules
   # ---------------------------------------------------------------------------
-  mkHome = { hidpi ? false, mutable ? false, mods ? [ ] }:
+  mkProfile = { hidpi ? false, mutable ? false, mods ? [ ] }:
     inputs.home-manager.lib.homeManagerConfiguration {
       # Package set with our overlays applied
       inherit pkgs;
-      
+
       # Combine base modules with profile-specific modules
       modules = modules' ++ mods;
-      
-      # Make inputs available in all modules as 'inputs' argument
-      # Allows modules to access: inputs.nvf, inputs.niri-flake, etc.
-      extraSpecialArgs = { inherit inputs; };
+
+      # Make inputs and platform info available in all modules
+      # Allows modules to access: inputs.nvf, inputs.niri-flake, isDarwin, etc.
+      extraSpecialArgs = { inherit inputs isDarwin; };
     };
 in
 # =============================================================================
@@ -82,6 +88,88 @@ in
 # =============================================================================
 # Each profile represents a complete user environment configuration
 # Profiles can be switched between without affecting system config
+#
+# PLATFORM-SPECIFIC PROFILES:
+# - Linux: default, niri
+# - macOS: default-darwin, aerospace
+# =============================================================================
+if isDarwin then
+# =============================================================================
+# MACOS (DARWIN) PROFILES
+# =============================================================================
+{
+  # ---------------------------------------------------------------------------
+  # DEFAULT-DARWIN PROFILE
+  # ---------------------------------------------------------------------------
+  # Minimal user configuration for macOS without window manager
+  #
+  # INCLUDES:
+  # - Core programs (git, zsh, alacritty, nvim, vscode, etc.)
+  # - Shell configuration and scripts
+  # - Development tools
+  #
+  # USE CASES:
+  # - Server/headless macOS environments
+  # - Testing user config without window manager
+  # - Remote SSH development
+  # - Base for creating new custom profiles
+  #
+  # SWITCH TO:
+  #   home-manager switch --flake .#default-darwin
+  # ---------------------------------------------------------------------------
+  default-darwin = mkProfile {
+    mods = [ ../home/shared ];
+  };
+
+  # ---------------------------------------------------------------------------
+  # AEROSPACE PROFILE
+  # ---------------------------------------------------------------------------
+  # Full desktop environment with Aerospace tiling window manager
+  #
+  # INCLUDES:
+  # - Everything from 'default-darwin' profile (via import)
+  # - Aerospace window manager configuration
+  # - macOS-optimized desktop utilities
+  # - Keyboard-driven workflow tools
+  #
+  # SYSTEM REQUIREMENTS:
+  # - Aerospace installed via Homebrew (handled by homebrew.nix)
+  # - macOS accessibility permissions for Aerospace
+  #
+  # USE CASES:
+  # - Tiling window manager workflow on macOS
+  # - Keyboard-driven desktop environment
+  # - Productivity-focused setup
+  #
+  # SWITCH TO:
+  #   home-manager switch --flake .#aerospace
+  #
+  # AFTER SWITCHING:
+  #   Grant accessibility permissions to Aerospace in System Settings
+  # ---------------------------------------------------------------------------
+  aerospace = mkProfile {
+    mods = [ ../home/wm/aerospace ];
+  };
+
+  # ---------------------------------------------------------------------------
+  # ADDING NEW MACOS PROFILES
+  # ---------------------------------------------------------------------------
+  # To create a new macOS profile:
+  #
+  # 1. Create profile directory: home/wm/<profile-name>/
+  # 2. Create default.nix that imports ../shared
+  # 3. Add profile-specific modules and packages
+  # 4. Add entry here in the isDarwin section
+  #
+  # PROFILE EXAMPLES:
+  # - yabai: Alternative tiling WM
+  # - rectangle: Simple window management
+  # - minimal-darwin: Absolute minimal macOS setup
+  # ---------------------------------------------------------------------------
+}
+else
+# =============================================================================
+# LINUX PROFILES
 # =============================================================================
 {
   # ---------------------------------------------------------------------------
@@ -104,7 +192,7 @@ in
   # SWITCH TO:
   #   home-manager switch --flake .#default
   # ---------------------------------------------------------------------------
-  default = mkHome {
+  default = mkProfile {
     mods = [ ../home/shared ];
   };
 
@@ -138,21 +226,21 @@ in
   # AFTER SWITCHING:
   #   Reboot or restart display manager to load Niri session
   # ---------------------------------------------------------------------------
-  niri = mkHome {
+  niri = mkProfile {
     mods = [ ../home/wm/niri ];
   };
-  
+
   # ---------------------------------------------------------------------------
-  # ADDING NEW PROFILES
+  # ADDING NEW LINUX PROFILES
   # ---------------------------------------------------------------------------
-  # To create a new profile:
+  # To create a new Linux profile:
   #
   # 1. Create profile directory: home/<profile-name>/
   # 2. Create default.nix that imports base config
   # 3. Add profile-specific modules and packages
-  # 4. Add entry here:
+  # 4. Add entry here in the Linux section:
   #
-  #   myprofile = mkHome {
+  #   myprofile = mkProfile {
   #     mods = [ ../home/<profile-name> ];
   #   };
   #
