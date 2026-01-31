@@ -54,6 +54,23 @@ jobs:
           done
           tailscale status
 
+      - name: Debug Tailscale connectivity
+        run: |
+          echo "=== Tailscale status ==="
+          tailscale status
+          echo ""
+          echo "=== Tailscale netcheck ==="
+          tailscale netcheck
+          echo ""
+          echo "=== Ping test ==="
+          ping -c 3 ${{ env.ARASAKA_IP }} || echo "Ping failed"
+          echo ""
+          echo "=== Route to target ==="
+          ip route get ${{ env.ARASAKA_IP }} || echo "No route"
+          echo ""
+          echo "=== Trying curl ==="
+          curl -v --connect-timeout 5 telnet://${{ env.ARASAKA_IP }}:22 2>&1 | head -20 || echo "Curl failed"
+
       - name: Verify connectivity
         run: |
           echo "Testing connectivity to arasaka..."
