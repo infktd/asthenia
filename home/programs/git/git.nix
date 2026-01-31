@@ -20,17 +20,19 @@ in
   programs.git = {
     enable = true;
 
-    # User identity for commits
-    userName = userName;
-    userEmail = userEmail;
-
     # GPG commit signing
     signing = {
       key = gpgKeyId;
       signByDefault = true;
     };
 
-    extraConfig = {
+    settings = {
+      # User identity for commits
+      user = {
+        name = userName;
+        email = userEmail;
+      };
+
       # Use SSH for GitHub
       url."git@github.com:".insteadOf = "https://github.com/";
 
