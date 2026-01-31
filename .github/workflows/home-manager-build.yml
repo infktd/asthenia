@@ -2,7 +2,7 @@ name: Home Manager Build Check
 
 on:
   push:
-    branches: 
+    branches:
       - main
       - flake-lock-update
     paths:
@@ -19,12 +19,56 @@ on:
       - 'flake.lock'
 
 jobs:
-  build-home:
+  build-home-linux:
     name: build-home-${{ matrix.profile }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         profile: [default, niri]
+      fail-fast: false
+
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build Home Manager profile
+        run: |
+          nix build .#homeConfigurations.${{ matrix.profile }}.activationPackage \
+            --print-build-logs \
+            --show-trace
+
+      - name: Check derivation info
+        if: success()
+        run: |
+          nix path-info .#homeConfigurations.${{ matrix.profile }}.activationPackage
+
+  build-home-darwin:
+    name: build-home-${{ matrix.profile }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        profile: [default-darwin, aerospace]
       fail-fast: false
 
     steps:
