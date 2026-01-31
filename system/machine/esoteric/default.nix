@@ -85,7 +85,7 @@
       allowed-users = [ "@admin" ];
 
       # Trusted users who can configure binary caches
-      trusted-users = [ "root" "infktd" ];
+      trusted-users = [ "root" "jayne" ];
     };
   };
 
@@ -114,7 +114,7 @@
   system = {
     # Primary user for system operations (required by nix-darwin)
     # This user will be used for applying system defaults that require a user context
-    primaryUser = "infktd";
+    primaryUser = "jayne";
 
     # macOS system defaults
     defaults = {
@@ -185,9 +185,9 @@
   # === USERS ===
   users = {
     users = {
-      infktd = {
-        description = "infktd";
-        home = "/Users/infktd";
+      jayne = {
+        description = "jayne";
+        home = "/Users/jayne";
       };
     };
   };

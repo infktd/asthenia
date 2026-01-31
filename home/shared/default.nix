@@ -41,7 +41,8 @@
   # ---------------------------------------------------------------------------
   # Username and home directory configuration
   # Automatically adjusts for macOS (/Users) vs Linux (/home)
-  username = "infktd";
+  # Different usernames per platform: jayne (macOS), infktd (Linux)
+  username = if isDarwin then "jayne" else "infktd";
   homeDirectory = if isDarwin then "/Users/${username}" else "/home/${username}";
   configHome = "${homeDirectory}/.config";
 
