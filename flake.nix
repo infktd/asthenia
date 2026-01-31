@@ -97,6 +97,12 @@
       url = "github:kaylorben/nixcord";
     };
 
+    # sops-nix - Secrets management with age encryption
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   # =============================================================================
