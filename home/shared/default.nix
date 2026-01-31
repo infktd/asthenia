@@ -79,6 +79,10 @@
     opencode # Opensource code editor
     python3 # Python interpreter
 
+    # --- Secrets Management ---
+    age # Modern encryption tool for secrets
+    sops # Secrets OPerationS - encrypts/decrypts secrets files
+
     # --- File and Directory Navigation ---
     eza # Modern ls replacement with colors and icons
     fd # Fast find replacement with intuitive syntax
@@ -130,6 +134,7 @@ in {
     ../themes # GTK themes, icons, fonts
     ./programs.nix # Program-specific configurations
     ./services.nix # User-level services (gpg-agent, etc.)
+    ./secrets.nix # Secrets management (sops-nix)
   ];
 
   # ---------------------------------------------------------------------------
