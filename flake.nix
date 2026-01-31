@@ -49,8 +49,7 @@
     # --- Core System Inputs ---
     
     # NixOS packages repository (unstable channel for latest packages)
-    # Using shallow clone to reduce disk space and speed up updates
-    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager - manages user-level configurations and dotfiles
     # Follows nixpkgs to ensure package version compatibility

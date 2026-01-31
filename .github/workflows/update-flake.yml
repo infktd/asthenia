@@ -243,7 +243,7 @@ jobs:
   auto-merge:
     needs: [update-flake-lock, build-nixos, build-darwin, build-home-linux, build-home-darwin]
     runs-on: ubuntu-latest
-    if: ${{ needs.update-flake-lock.outputs.pr_created }}
+    if: ${{ always() && needs.update-flake-lock.outputs.pr_created != '' && needs.build-nixos.result == 'success' && needs.build-darwin.result == 'success' && needs.build-home-linux.result == 'success' && needs.build-home-darwin.result == 'success' }}
     permissions:
       contents: write
       pull-requests: write
