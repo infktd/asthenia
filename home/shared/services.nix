@@ -1,24 +1,31 @@
 # =============================================================================
 # USER SERVICES
 # =============================================================================
-# User-level systemd services and daemons
+# User-level services and daemons
 # These run in the user session (not system-wide)
 #
-# SYSTEM VS USER SERVICES:
-# - System services (system/): Run as root, start at boot
-# - User services (this file): Run as user, start at login
+# CROSS-PLATFORM SUPPORT:
+# - Linux: Uses systemd user services
+# - macOS: Uses launchd agents (managed by Home Manager)
 #
 # CURRENT SERVICES:
-# - gpg-agent: Manages GPG keys and provides SSH agent
+# - gpg-agent: Manages GPG keys and provides SSH agent (cross-platform)
 #
 # SERVICE MANAGEMENT:
+# Linux (systemd):
 # - Start: systemctl --user start <service>
 # - Stop: systemctl --user stop <service>
 # - Status: systemctl --user status <service>
 # - Logs: journalctl --user -u <service>
 #
+# macOS (launchd):
+# - Start: launchctl start <service>
+# - Stop: launchctl stop <service>
+# - List: launchctl list
+#
 # ADDING NEW SERVICES:
-# Add to services = { } block below or create systemd.user.services entries
+# Add to services = { } block below
+# Home Manager handles platform-specific service managers
 # Example: services.syncthing.enable = true;
 # =============================================================================
 {

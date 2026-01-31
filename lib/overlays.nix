@@ -72,17 +72,34 @@ let
   # - Makes it easy to override settings per-machine or per-user
   #
   # BUILDERS AVAILABLE:
-  # - pkgs.builders.mkHome: Creates Home Manager configurations
+  # - pkgs.builders.mkHome: Creates Home Manager configurations (Linux)
+  # - pkgs.builders.mkHomeDarwin: Creates Home Manager configurations (macOS)
   # - pkgs.builders.mkNixos: Creates NixOS system configurations
+  # - pkgs.builders.mkDarwin: Creates nix-darwin system configurations
   #
   # USAGE IN FLAKE.NIX:
-  #   homeConfigurations = pkgs.builders.mkHome { };
-  #   nixosConfigurations = pkgs.builders.mkNixos { };
+  #   homeConfigurations = linuxPkgs.builders.mkHome { } // darwinPkgs.builders.mkHomeDarwin { };
+  #   nixosConfigurations = linuxPkgs.builders.mkNixos { };
+  #   darwinConfigurations = darwinPkgs.builders.mkDarwin { };
   # ---------------------------------------------------------------------------
   overlays = f: p: {
-    # Builder functions for creating Home Manager and NixOS configurations
+    # Builder functions for creating Home Manager, NixOS, and Darwin configurations
     builders = {
-      # --- HOME MANAGER BUILDER ---
+      # --- DARWIN SYSTEM BUILDER ---
+      # Creates system-level configurations for macOS machines
+      #
+      # PARAMETERS:
+      # - pkgs: Package set to use (defaults to final overlay pkgs)
+      # - extraSystemConfig: Additional modules to merge into all systems
+      #
+      # RETURNS: Attribute set of Darwin configurations
+      #   { esoteric = ...; <other-machines> = ...; }
+      #
+      # IMPLEMENTATION: See outputs/darwin.nix for system definitions
+      mkDarwin = { pkgs ? f, extraSystemConfig ? { } }:
+        import ../outputs/darwin.nix { inherit extraSystemConfig inputs pkgs system; };
+
+      # --- HOME MANAGER BUILDER (LINUX) ---
       # Creates user-level configurations (dotfiles, programs, themes)
       #
       # PARAMETERS:
@@ -94,7 +111,27 @@ let
       #
       # IMPLEMENTATION: See outputs/hm.nix for profile definitions
       mkHome = { pkgs ? f, extraHomeConfig ? { } }:
-        import ../outputs/hm.nix { inherit extraHomeConfig inputs pkgs system; };
+        import ../outputs/hm.nix {
+          inherit extraHomeConfig inputs pkgs system;
+          isDarwin = false;
+        };
+
+      # --- HOME MANAGER BUILDER (DARWIN) ---
+      # Creates user-level configurations for macOS
+      #
+      # PARAMETERS:
+      # - pkgs: Package set to use (defaults to final overlay pkgs)
+      # - extraHomeConfig: Additional modules to merge into all profiles
+      #
+      # RETURNS: Attribute set of Home Manager configurations
+      #   { default-darwin = ...; aerospace = ...; }
+      #
+      # IMPLEMENTATION: See outputs/hm.nix for profile definitions
+      mkHomeDarwin = { pkgs ? f, extraHomeConfig ? { } }:
+        import ../outputs/hm.nix {
+          inherit extraHomeConfig inputs pkgs system;
+          isDarwin = true;
+        };
 
       # --- NIXOS SYSTEM BUILDER ---
       # Creates system-level configurations (kernel, drivers, services)

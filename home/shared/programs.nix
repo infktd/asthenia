@@ -9,6 +9,11 @@
 # - home/programs/<name>/: Dedicated configuration per program
 # - Modular approach: Easy to enable/disable programs
 #
+# CROSS-PLATFORM SUPPORT:
+# - Common programs work on both Linux and macOS
+# - Linux-only programs (fuzzel, discord via nix) are conditionally imported
+# - macOS GUI apps typically installed via Homebrew casks
+#
 # ADDING NEW PROGRAMS:
 # 1. Create directory: home/programs/<program-name>/
 # 2. Create config file: home/programs/<program-name>/<program-name>.nix
@@ -20,37 +25,49 @@
 # - Terminal: alacritty (terminal emulator)
 # - Editor: nvf (Neovim), vscode (VS Code)
 # - Browser: chrome (Chromium-based browser)
-# - Communication: discord (with nixcord themes)
+# - Communication: discord (with nixcord themes) [Linux only via Nix]
 # - Productivity: obsidian (note-taking), yazi (file manager)
 # - Version Control: git (with identity configuration)
-# - Launcher: fuzzle (application launcher)
+# - Launcher: fuzzel (application launcher) [Linux/Wayland only]
 # =============================================================================
-{ pkgs, config, lib, ... }:
+{ pkgs, config, lib, isDarwin ? false, ... }:
 
+let
+  # ---------------------------------------------------------------------------
+  # CROSS-PLATFORM IMPORTS
+  # ---------------------------------------------------------------------------
+  # Programs that work on both Linux and macOS
+  commonImports = [
+    # --- Development Tools ---
+    ../programs/git/git.nix        # Git version control with user identity
+    ../programs/zed-editor/zed-editor.nix  # Zed editor
+
+    # --- Shell and Terminal ---
+    ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
+    ../programs/yazi/yazi.nix      # Terminal file manager
+  ];
+
+  # ---------------------------------------------------------------------------
+  # LINUX-ONLY IMPORTS
+  # ---------------------------------------------------------------------------
+  # Programs that only work on Linux (Wayland, X11, or Linux-specific)
+  # macOS equivalents are typically installed via Homebrew casks
+  linuxImports = [
+    ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal (use Homebrew on macOS)
+    ../programs/chrome/chrome.nix        # Chromium browser (use Homebrew on macOS)
+    ../programs/discord/discord.nix      # Discord with custom themes (use Homebrew on macOS)
+    ../programs/fuzzle/fuzzle.nix        # Wayland application launcher
+    ../programs/vscode/vscode.nix        # VS Code editor (use Homebrew on macOS)
+    ../programs/zellij/zellij.nix        # Terminal workspace manager
+  ];
+in
 {
   # ---------------------------------------------------------------------------
   # PROGRAM MODULE IMPORTS
   # ---------------------------------------------------------------------------
   # Each import loads a complete program configuration
   # Programs can be commented out to disable them
-  imports = [
-    # --- Development Tools ---
-    ../programs/git/git.nix        # Git version control with user identity
-    ../programs/vscode/vscode.nix  # VS Code editor with extensions
-    ../programs/zed-editor/zed-editor.nix  # Zed editor
-    
-    # --- Shell and Terminal ---
-    ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
-    ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal
-    ../programs/zellij/zellij.nix  # Terminal workspace manager
-
-    
-    # --- Applications ---
-    ../programs/chrome/chrome.nix      # Chromium browser
-    ../programs/discord/discord.nix    # Discord with custom themes
-    ../programs/yazi/yazi.nix          # Terminal file manager
-    ../programs/fuzzle/fuzzle.nix      # Application launcher
-  ];
+  imports = commonImports ++ (lib.optionals (!isDarwin) linuxImports);
 
   # ---------------------------------------------------------------------------
   # INLINE PROGRAM CONFIGURATIONS
