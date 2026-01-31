@@ -505,8 +505,6 @@ This repository includes GitHub Actions workflows for continuous integration and
 | `darwin-build.yml` | PR to main with Darwin changes | Validate nix-darwin builds |
 | `home-manager-linux.yml` | PR to main with Linux home changes | Validate Home Manager Linux builds |
 | `home-manager-darwin.yml` | PR to main with Darwin home changes | Validate Home Manager Darwin builds |
-| `flake-check.yml` | All PRs | Run `nix flake check` |
-| `format-check.yml` | All PRs | Check Alejandra formatting |
 
 All workflows can be triggered manually via the GitHub Actions UI.
 
