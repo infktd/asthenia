@@ -6,11 +6,17 @@
 #
 # ARCHITECTURE:
 # - This module: Core user settings, base packages, universal programs
-# - Profile modules (niri, etc.): Add WM-specific packages and config
+# - Profile modules (niri, aerospace, etc.): Add WM-specific packages and config
 #
 # INCLUDED IN:
-# - home/wm/niri (desktop profile)
+# - home/wm/niri (Linux desktop profile)
+# - home/wm/aerospace (macOS desktop profile)
 # - Future profiles (kde, hyprland, minimal, etc.)
+#
+# CROSS-PLATFORM SUPPORT:
+# - Detects darwin vs Linux via isDarwin parameter
+# - Adjusts homeDirectory path automatically (/Users vs /home)
+# - Filters out Linux-only packages on darwin
 #
 # WHAT BELONGS HERE:
 # - Programs used across all profiles (git, shell, editor)
@@ -22,19 +28,22 @@
 # - Window manager specific packages (belong in wm/<name>/)
 # - GUI apps only needed in desktop (belong in wm/<name>/)
 # - Machine-specific tools (add per-profile)
+# - Linux-only packages (use conditional or place in wm/niri)
 # =============================================================================
 {
   pkgs,
   lib,
+  isDarwin ? false,
   ...
 }: let
   # ---------------------------------------------------------------------------
   # USER IDENTITY
   # ---------------------------------------------------------------------------
   # Username and home directory configuration
-  # Change these to match your system user
-  username = "infktd";
-  homeDirectory = "/home/${username}";
+  # Automatically adjusts for macOS (/Users) vs Linux (/home)
+  # Different usernames per platform: jayne (macOS), infktd (Linux)
+  username = if isDarwin then "jayne" else "infktd";
+  homeDirectory = if isDarwin then "/Users/${username}" else "/home/${username}";
   configHome = "${homeDirectory}/.config";
 
   # ---------------------------------------------------------------------------
@@ -49,48 +58,61 @@
   # ---------------------------------------------------------------------------
   # Core utilities available in all profiles
   # These tools are useful in both CLI and GUI environments
-  packages = with pkgs;
-    [
-      # --- System Monitoring and Information ---
-      bottom # Modern system monitor (btm) - alternative to htop
-      dust # Disk usage analyzer - visual, fast alternative to du
+  #
+  # CROSS-PLATFORM:
+  # - Common packages work on both Linux and macOS
+  # - Linux-only packages are filtered out on Darwin
+  # - macOS GUI apps typically installed via Homebrew casks
+  # ---------------------------------------------------------------------------
 
-      # --- File and Directory Navigation ---
-      eza # Modern ls replacement with colors and icons
-      fd # Fast find replacement with intuitive syntax
-      tree # Directory tree viewer
+  # Packages available on all platforms
+  commonPackages = with pkgs; [
+    # --- Applications ---
+    obsidian # Note-taking app
 
-      # --- Text Search and Processing ---
-      ripgrep # Fast grep alternative (rg) - respects .gitignore
+    # --- Development Tools ---
+    claude-code # Claude AI code assistant
+    git # Version control
+    github-copilot-cli # GitHub Copilot CLI tool
+    go # Go programming language
+    nodejs # Node.js runtime
+    opencode # Opensource code editor
+    python3 # Python interpreter
 
-      # --- Applications ---
-      bolt-launcher # Launcher application
-      signal-desktop # Secure messaging
-      vlc # Media player
-      yubioath-flutter # Yubikey authenticator
-      obsidian # Note-taking app
+    # --- File and Directory Navigation ---
+    eza # Modern ls replacement with colors and icons
+    fd # Fast find replacement with intuitive syntax
+    tree # Directory tree viewer
 
-      # --- System Utilities ---
-      xorg.xhost # X11 access control (needed for some apps)
-      xdg-utils # Utilities for managing XDG directories and MIME types
-      vulkan-tools # Vulkan utilities (vulkaninfo, etc.)
+    # --- File Management ---
+    unzip # Extract zip archives
+    zip # Create zip archives
 
-      # --- File Management ---
-      unzip # Extract zip archives
-      zip # Create zip archives
+    # --- System Monitoring and Information ---
+    bottom # Modern system monitor (btm) - alternative to htop
+    dust # Disk usage analyzer - visual, fast alternative to du
 
-      # --- Development Tools ---
-      git # Version control
-      github-copilot-cli # GitHub Copilot CLI tool
-      opencode # Opensource code editor
-      claude-code # Claude AI code assistant
+    # --- Text Search and Processing ---
+    ripgrep # Fast grep alternative (rg) - respects .gitignore
+  ];
 
+  # Packages only available on Linux
+  linuxPackages = with pkgs; [
+    # --- Applications (Linux-specific or better on Linux) ---
+    bolt-launcher # Launcher application
+    signal-desktop # Secure messaging (Linux-only)
+    vlc # Media player
+    yubioath-flutter # Yubikey authenticator
 
-      # --- Programming Languages ---
-      python3 # Python interpreter
-      nodejs # Node.js runtime
-      go # Go programming language
-    ]
+    # --- System Utilities (Linux-specific) ---
+    vulkan-tools # Vulkan utilities (vulkaninfo, etc.)
+    xdg-utils # Utilities for managing XDG directories and MIME types
+    xorg.xhost # X11 access control (needed for some apps)
+  ];
+
+  packages =
+    commonPackages
+    ++ (lib.optionals (!isDarwin) linuxPackages)
     ++ (lib.attrValues (lib.filterAttrs (n: v: !lib.isFunction v) scripts));
 in {
   # ---------------------------------------------------------------------------
@@ -142,12 +164,14 @@ in {
   };
 
   # ---------------------------------------------------------------------------
-  # SYSTEMD USER SERVICES
+  # SYSTEMD USER SERVICES (Linux only)
   # ---------------------------------------------------------------------------
   # Restart systemd services on Home Manager switch
   # "sd-switch" mode: Restart changed services, start new ones, stop removed ones
   # Alternatives:
   # - "legacy": Just reload systemd daemon
   # - "suggest": Show commands to run manually
-  systemd.user.startServices = "sd-switch";
+  #
+  # NOTE: This is Linux-only; macOS uses launchd instead
+  systemd.user.startServices = lib.mkIf (!isDarwin) "sd-switch";
 }

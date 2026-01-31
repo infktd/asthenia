@@ -3,6 +3,9 @@
 # =============================================================================
 # User-level GTK theming for consistent look across GTK applications
 #
+# PLATFORM: Linux only (GTK is not used on macOS)
+# macOS uses native AppKit theming controlled via System Settings
+#
 # THEMES USED:
 # - GTK Theme: Juno-ocean (dark theme)
 # - Icon Theme: BeautyLine (modern icon set)
@@ -21,9 +24,10 @@
 # - Preview: gtk3-demo or gtk4-demo
 # - Browse themes: https://www.gnome-look.org/
 # =============================================================================
-{ pkgs, ... }: {
-  gtk = rec {
+{ pkgs, lib, isDarwin ? false, ... }: {
+  gtk = lib.mkIf (!isDarwin) rec {
     # Enable GTK theme management via Home Manager
+    # Only on Linux - macOS doesn't use GTK
     enable = true;
     
     # ---------------------------------------------------------------------------
