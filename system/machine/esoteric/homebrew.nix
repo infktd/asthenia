@@ -55,7 +55,6 @@
     taps = [
       "homebrew/bundle"
       "homebrew/services"
-      "nikitabobko/tap"  # Aerospace window manager
     ];
 
     # ---------------------------------------------------------------------------
@@ -70,32 +69,13 @@
     # ---------------------------------------------------------------------------
     # CASKS
     # ---------------------------------------------------------------------------
-    # GUI applications installed via Homebrew Cask
-    # These are macOS apps that benefit from native installation
+    # GUI applications that MUST be installed via Homebrew
+    # Only include apps not available in nixpkgs or requiring macOS integration
+    #
+    # Currently empty - all apps managed by Nix/home-manager
+    # Add casks here only if absolutely necessary (e.g., apps requiring
+    # deep macOS integration not available in nixpkgs)
     casks = [
-      # --- Development ---
-      "alacritty"
-      "visual-studio-code"
-      "zed"
-
-      # --- Browsers ---
-      "arc"
-      "firefox"
-      "google-chrome"
-
-      # --- Communication ---
-      "discord"
-      "signal"
-
-      # --- Productivity ---
-      "obsidian"
-      "raycast"
-
-      # --- Utilities ---
-      "1password"
-
-      # --- Window Management ---
-      "aerospace"  # Tiling window manager
     ];
 
     # ---------------------------------------------------------------------------
