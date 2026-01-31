@@ -6,141 +6,139 @@
 # ALACRITTY FEATURES:
 # - OpenGL rendering for smooth performance
 # - Cross-platform (Linux, macOS, Windows)
-# - Minimal configuration in TOML/YAML
-# - Vi mode for keyboard navigation
+# - Minimal resource usage
 #
-# THEME:
-# - Oxocarbon: IBM Carbon-inspired dark theme
-# - Good contrast and readability
-# - Separate theme file for easy switching
+# THEME: Claude Dark
+# - Warm, earthy colors easy on the eyes
+# - Terracotta accents
+# - Sage greens and dusty blues
 #
-# CONFIGURATION STRUCTURE:
-# - Theme: Separate TOML file (~/.config/alacritty/theme.toml)
-# - Settings: Managed by Home Manager
-# - Import theme via general.import
+# MACOS NOTE:
+# - option_as_alt = "Both" enables Alt+key bindings for Zellij
 # =============================================================================
 { config, pkgs, lib, ... }:
 
-let
-  # ---------------------------------------------------------------------------
-  # OXOCARBON THEME
-  # ---------------------------------------------------------------------------
-  # IBM Carbon Design-inspired color scheme
-  # Features muted colors for reduced eye strain
-  #
-  # THEME STRUCTURE:
-  # - primary: Background and foreground colors
-  # - normal: Standard ANSI colors (black, red, green, etc.)
-  # - bright: Bright/bold variants of ANSI colors
-  #
-  # TO CHANGE THEME:
-  # 1. Create new theme TOML file
-  # 2. Update oxocarbonToml variable
-  # 3. Run: home-manager switch
-  # ---------------------------------------------------------------------------
-  oxocarbonToml = pkgs.writeText "theme.toml" ''
-[colors.primary]
-background = "#161616"  # Very dark gray (not pure black)
-foreground = "#f2f4f8"  # Light gray for text
-
-[colors.normal]
-black   = "#262626"  # Terminal black
-red     = "#ee5396"  # Pink-red
-green   = "#42be65"  # Mint green
-yellow  = "#ffe97b"  # Soft yellow
-blue    = "#33b1ff"  # Cyan-blue
-magenta = "#be95ff"  # Purple
-cyan    = "#3ddbd9"  # Turquoise
-white   = "#dde1e6"  # Light gray
-
-[colors.bright]
-black   = "#393939"  # Lighter black
-red     = "#ff7eb6"  # Bright pink-red
-green   = "#57fa99"  # Bright green
-yellow  = "#fddc6c"  # Bright yellow
-blue    = "#78a9ff"  # Bright blue
-magenta = "#d4bbff"  # Bright purple
-cyan    = "#08bdba"  # Bright cyan
-white   = "#ffffff"  # Pure white
-'';
-in
 {
-  # ---------------------------------------------------------------------------
-  # THEME FILE INSTALLATION
-  # ---------------------------------------------------------------------------
-  # Install theme to ~/.config/alacritty/theme.toml
-  # Alacritty will import this file on startup
-  xdg.configFile."alacritty/theme.toml".source = oxocarbonToml;
-  
-  # ---------------------------------------------------------------------------
-  # ALACRITTY CONFIGURATION
-  # ---------------------------------------------------------------------------
   programs.alacritty = {
-    # Enable Alacritty terminal emulator
     enable = true;
-    
-    # Settings map to alacritty.toml configuration
+
     settings = {
       # -----------------------------------------------------------------------
-      # IMPORTS
-      # -----------------------------------------------------------------------
-      # Import external theme file
-      # Allows easy theme switching without changing main config
-      general.import = [ "~/.config/alacritty/theme.toml" ];
-      
-      # -----------------------------------------------------------------------
-      # FONT CONFIGURATION
-      # -----------------------------------------------------------------------
-      font = {
-        # Use system monospace font
-        # Typically resolves to JetBrains Mono or Iosevka (from Nerd Fonts)
-        normal.family = "JetBrains Mono Nerd Font";
-        
-        # Font size in points
-        # Adjust based on monitor DPI and preference
-        size = 12.0;
-        
-        # Additional font options:
-        # bold.family = "monospace";
-        # italic.family = "monospace";
-      };
-      
-      # -----------------------------------------------------------------------
-      # WINDOW SETTINGS
+      # WINDOW
       # -----------------------------------------------------------------------
       window = {
-        # Window opacity (0.0 = transparent, 1.0 = opaque)
-        # Requires compositor support (works with Niri/Wayland)
-        opacity = 0.75;
-        
-        # Padding around terminal text
-        # Provides breathing room at window edges
-        padding = { x = 0; y = 0; };
-        
-        # Additional window options:
-        # decorations = "full";  # "full", "none", or "transparent"
-        # startup_mode = "Windowed";  # "Windowed", "Maximized", "Fullscreen"
-        # dynamic_title = true;  # Update title based on terminal content
+        # Padding around terminal content
+        padding = { x = 8; y = 8; };
+
+        # Window decorations (macOS: Buttonless hides title bar buttons)
+        decorations = "Buttonless";
+
+        # Opacity (1.0 = fully opaque)
+        opacity = 1.0;
+
+        # Startup mode
+        startup_mode = "Windowed";
+
+        # Make Option key behave as Alt (required for Zellij Alt+key bindings)
+        option_as_alt = "Both";
       };
-      
+
       # -----------------------------------------------------------------------
-      # ADDITIONAL CONFIGURATION OPTIONS
+      # FONT
       # -----------------------------------------------------------------------
-      # Scrollback buffer (lines to keep in memory):
-      # scrolling.history = 10000;
-      #
-      # Cursor style:
-      # cursor.style = { shape = "Block"; blinking = "Off"; };
-      #
-      # Mouse bindings:
-      # mouse.hide_when_typing = true;
-      #
-      # Key bindings:
-      # key_bindings = [
-      #   { key = "V"; mods = "Control|Shift"; action = "Paste"; }
-      #   { key = "C"; mods = "Control|Shift"; action = "Copy"; }
-      # ];
+      font = {
+        size = 14.0;
+
+        normal = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Regular";
+        };
+
+        bold = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Bold";
+        };
+
+        italic = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Italic";
+        };
+      };
+
       # -----------------------------------------------------------------------
+      # SCROLLING
+      # -----------------------------------------------------------------------
+      scrolling = {
+        history = 10000;
+        multiplier = 3;
+      };
+
+      # -----------------------------------------------------------------------
+      # CURSOR
+      # -----------------------------------------------------------------------
+      cursor = {
+        style = {
+          shape = "Block";
+          blinking = "Off";
+        };
+      };
+
+      # -----------------------------------------------------------------------
+      # SELECTION
+      # -----------------------------------------------------------------------
+      selection = {
+        save_to_clipboard = true;
+      };
+
+      # -----------------------------------------------------------------------
+      # TERMINAL
+      # -----------------------------------------------------------------------
+      terminal = {
+        osc52 = "CopyPaste";
+      };
+
+      # -----------------------------------------------------------------------
+      # COLORS - Claude Dark Theme
+      # -----------------------------------------------------------------------
+      # Warm, earthy palette - easy on the eyes
+      colors = {
+        primary = {
+          foreground = "#E8E0D4";  # Warm off-white
+          background = "#2A2520";  # Warm dark brown
+        };
+
+        cursor = {
+          cursor = "#D97757";  # Terracotta
+          text = "#2A2520";
+        };
+
+        selection = {
+          background = "#4A423A";  # Muted brown
+          text = "#E8E0D4";
+        };
+
+        normal = {
+          black   = "#1A1815";  # Deep warm black
+          red     = "#D97757";  # Terracotta
+          green   = "#7BAA8E";  # Sage green
+          yellow  = "#D4A44D";  # Warm gold
+          blue    = "#6B8B9C";  # Dusty blue
+          magenta = "#B68F9A";  # Dusty rose
+          cyan    = "#8AABA1";  # Sage seafoam
+          white   = "#F5F1E8";  # Cream
+        };
+
+        bright = {
+          black   = "#3D3529";  # Warm charcoal
+          red     = "#E8875F";  # Bright terracotta
+          green   = "#8BBAA0";  # Bright sage
+          yellow  = "#E4B45D";  # Bright gold
+          blue    = "#7B9BAC";  # Bright dusty blue
+          magenta = "#C69FAA";  # Bright dusty rose
+          cyan    = "#9ABBB1";  # Bright seafoam
+          white   = "#FAF8F3";  # Bright cream
+        };
+      };
     };
   };
 }
