@@ -1,0 +1,111 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target'
+        required: true
+        type: choice
+        options:
+          - arasaka
+          - esoteric
+          - all
+  # Auto-deploy after successful builds on main
+  workflow_run:
+    workflows:
+      - "NixOS Build Check"
+      - "Darwin Build Check"
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  ARASAKA_IP: "100.64.0.0"
+  ESOTERIC_IP: "100.64.0.1"
+
+jobs:
+  # =============================================================================
+  # DEPLOY TO NIXOS (ARASAKA)
+  # =============================================================================
+  deploy-arasaka:
+    if: |
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'arasaka' || github.event.inputs.target == 'all')) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'NixOS Build Check' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+      - name: Deploy to arasaka
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.CD_SSH_PRIVATE_KEY }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ env.ARASAKA_IP }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Deploy
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 infktd@${{ env.ARASAKA_IP }} << 'EOF'
+            cd ~/.config/asthenia
+            git pull
+            sudo nixos-rebuild switch --flake .#arasaka
+            home-manager switch --flake .#niri
+          EOF
+
+      - name: Deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Successfully deployed to arasaka"
+          else
+            echo "❌ Deployment to arasaka failed"
+          fi
+
+  # =============================================================================
+  # DEPLOY TO DARWIN (ESOTERIC)
+  # =============================================================================
+  deploy-esoteric:
+    if: |
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'esoteric' || github.event.inputs.target == 'all')) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Darwin Build Check' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+      - name: Deploy to esoteric
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.CD_SSH_PRIVATE_KEY }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ env.ESOTERIC_IP }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Deploy
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 jayne@${{ env.ESOTERIC_IP }} << 'EOF'
+            cd ~/.config/asthenia
+            git pull
+            darwin-rebuild switch --flake .#esoteric
+            home-manager switch --flake .#aerospace
+          EOF
+
+      - name: Deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Successfully deployed to esoteric"
+          else
+            echo "❌ Deployment to esoteric failed"
+          fi

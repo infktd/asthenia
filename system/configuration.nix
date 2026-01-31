@@ -141,6 +141,10 @@ in
     extraGroups = [ "networkmanager" "wheel" "video" "render" "docker" ];
     isNormalUser = true;
     shell = pkgs.zsh;
+    openssh.authorizedKeys.keys = [
+      # GitHub Actions CD key
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPKJDMqqnw2+q83PRh8n2ZZucRA1jw+WgIxLB6dhytzk github-actions-cd"
+    ];
   };
 
   # === VIRTUALISATION ===

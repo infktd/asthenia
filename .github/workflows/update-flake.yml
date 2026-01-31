@@ -6,8 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  # =============================================================================
+  # UPDATE FLAKE.LOCK
+  # =============================================================================
   update-flake-lock:
     runs-on: ubuntu-latest
+    outputs:
+      pr_created: ${{ steps.create-pr.outputs.pull-request-number }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,16 +24,211 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
-      - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
-
       - name: Update flake.lock
         run: nix flake update
 
       - name: Create Pull Request
+        id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "chore: update flake.lock"
           title: "chore: update flake.lock"
-          body: "Automated weekly flake.lock update"
+          body: |
+            Automated weekly flake.lock update.
+
+            CI will build and cache all configurations after this PR is created.
           branch: flake-lock-update
+
+  # =============================================================================
+  # BUILD NIXOS (pre-warm cache)
+  # =============================================================================
+  build-nixos:
+    needs: update-flake-lock
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: [arasaka]
+      fail-fast: false
+
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: flake-lock-update
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: asthenia
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Build NixOS configuration
+        run: |
+          nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
+            --print-build-logs \
+            --show-trace
+
+      - name: Push to Cachix
+        run: |
+          cachix push asthenia ./result
+
+  # =============================================================================
+  # BUILD DARWIN (pre-warm cache)
+  # =============================================================================
+  build-darwin:
+    needs: update-flake-lock
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        host: [esoteric]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: flake-lock-update
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: asthenia
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Build Darwin configuration
+        run: |
+          nix build .#darwinConfigurations.${{ matrix.host }}.system \
+            --print-build-logs \
+            --show-trace
+
+      - name: Push to Cachix
+        run: |
+          cachix push asthenia ./result
+
+  # =============================================================================
+  # BUILD HOME MANAGER LINUX (pre-warm cache)
+  # =============================================================================
+  build-home-linux:
+    needs: update-flake-lock
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: [default, niri]
+      fail-fast: false
+
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: flake-lock-update
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: asthenia
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Build Home Manager profile
+        run: |
+          nix build .#homeConfigurations.${{ matrix.profile }}.activationPackage \
+            --print-build-logs \
+            --show-trace
+
+      - name: Push to Cachix
+        run: |
+          cachix push asthenia ./result
+
+  # =============================================================================
+  # BUILD HOME MANAGER DARWIN (pre-warm cache)
+  # =============================================================================
+  build-home-darwin:
+    needs: update-flake-lock
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        profile: [default-darwin, aerospace]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: flake-lock-update
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: asthenia
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Build Home Manager profile
+        run: |
+          nix build .#homeConfigurations.${{ matrix.profile }}.activationPackage \
+            --print-build-logs \
+            --show-trace
+
+      - name: Push to Cachix
+        run: |
+          cachix push asthenia ./result
