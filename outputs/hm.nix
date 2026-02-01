@@ -82,7 +82,7 @@ let
       modules = modules' ++ mods;
 
       # Make inputs and platform info available in all modules
-      # Allows modules to access: inputs.nvf, inputs.niri-flake, isDarwin, etc.
+      # Allows modules to access: inputs.niri-flake, isDarwin, etc.
       extraSpecialArgs = { inherit inputs isDarwin; };
     };
 in

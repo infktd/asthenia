@@ -53,7 +53,6 @@ in
 
   # === IMPORTS ===
   imports = [
-    inputs.neovim-flake.nixosModules.default
   ];
 
   # === NETWORKING ===

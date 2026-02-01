@@ -97,7 +97,7 @@ let
   # - config: Current system configuration state
   # - lib: Extended nixpkgs lib with our custom functions
   # - pkgs: Package set with our overlays applied
-  # - inputs: Flake inputs (niri-flake, dms, nvf, etc.)
+  # - inputs: Flake inputs (niri-flake, dms, etc.)
   # ---------------------------------------------------------------------------
   make = host: {
     ${host} = nixosSystem {
