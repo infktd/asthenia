@@ -46,7 +46,6 @@ let
 
     # --- Shell and Terminal ---
     ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal
-    ../programs/kitty/kitty.nix    # kitty terminal
     ../programs/zsh/zsh.nix        # Zsh shell with oh-my-zsh and plugins
     ../programs/yazi/yazi.nix      # Terminal file manager
     ../programs/zellij/zellij.nix  # Terminal workspace manager

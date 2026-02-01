@@ -28,6 +28,48 @@
     ./homebrew.nix
   ];
 
+  # === APPLICATION ALIASES ===
+  # Create macOS aliases for Nix apps so Spotlight can index them
+  # Symlinks don't work with Spotlight - must use native macOS aliases
+  system.activationScripts.applications.text = let
+    env = pkgs.buildEnv {
+      name = "system-applications";
+      paths = config.environment.systemPackages;
+      pathsToLink = [ "/Applications" ];
+    };
+  in
+    lib.mkForce ''
+      # Set up applications in /Applications/Nix Apps
+      echo "setting up /Applications/Nix Apps..." >&2
+      rm -rf /Applications/Nix\ Apps
+      mkdir -p /Applications/Nix\ Apps
+      find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' ';' |
+      while read -r src; do
+        app_name=$(basename "$src")
+        echo "copying $src" >&2
+        ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
+      done
+
+      # Also handle Home Manager apps for user jayne
+      HM_APPS="/Users/jayne/Applications/Home Manager Apps"
+      if [ -e "$HM_APPS" ]; then
+        echo "setting up Home Manager apps..." >&2
+        rm -rf "/Applications/Home Manager Apps"
+        mkdir -p "/Applications/Home Manager Apps"
+        # Resolve the HM_APPS path (it's a symlink to the store)
+        HM_APPS_REAL=$(${pkgs.coreutils}/bin/readlink -f "$HM_APPS")
+        # Find all .app entries (they are symlinks in the store)
+        find "$HM_APPS_REAL" -maxdepth 1 -name "*.app" -type l |
+        while read -r lnk; do
+          # Resolve the symlink to get the actual app bundle
+          src=$(${pkgs.coreutils}/bin/readlink -f "$lnk")
+          app_name=$(basename "$lnk")
+          echo "aliasing $app_name -> $src" >&2
+          ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Home Manager Apps/$app_name"
+        done
+      fi
+    '';
+
   # === ENVIRONMENT ===
   # System-wide environment variables
   environment = {
