@@ -33,10 +33,12 @@
     # Binary cache servers to fetch pre-built packages from
     extra-substituters = [
       "https://cache.nixos.org"
+      "https://claude-code.cachix.org"  # Pre-built claude-code binaries
     ];
     # Public keys for verifying downloaded binaries
     extra-trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
     ];
   };
 
@@ -93,6 +95,12 @@
     # sops-nix - Secrets management with age encryption
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # claude-code-nix - Always up-to-date Claude Code with native binary support
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

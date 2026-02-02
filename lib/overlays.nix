@@ -156,6 +156,7 @@ in
 # 1. libOverlay: Adds lib.exe function
 # 2. overlays: Adds builder functions (mkHome, mkNixos)
 # 3. niri-flake overlay: Adds niri-unstable package
+# 4. claude-code overlay: Adds claude-code packages (native, node, bun)
 #
 # Each overlay can reference packages and functions from previous overlays
 # =============================================================================
@@ -163,4 +164,5 @@ in
   libOverlay
   overlays
   inputs.niri-flake.overlays.niri    # Provides pkgs.niri-unstable
+  inputs.claude-code.overlays.default  # Provides pkgs.claude-code (native, node, bun)
 ]
