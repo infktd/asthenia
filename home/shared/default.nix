@@ -71,7 +71,7 @@
     obsidian # Note-taking app
 
     # --- Development Tools ---
-    claude-code # Claude AI code assistant
+    claude-code # Claude AI code assistant (from claude-code-nix flake)
     git # Version control
     github-copilot-cli # GitHub Copilot CLI tool
     go # Go programming language
