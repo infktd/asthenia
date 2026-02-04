@@ -3,12 +3,13 @@
 # =============================================================================
 # Nix configuration for Waybar status bar.
 #
-# This provides a comprehensive status bar for Hyprland with:
-# - Workspace indicators
-# - System monitoring (CPU, memory, network)
-# - Audio controls
-# - Battery status
-# - System tray
+# Inspired by gvolpe's nix-config with:
+# - Custom arrow separators for sleek design
+# - Multi-segment clock display
+# - MPRIS media player integration
+# - Grouped power menu with drawer
+# - Enhanced workspace icons
+# - System monitoring (CPU, memory, disk, network)
 # =============================================================================
 
 { config, lib, pkgs, ... }:
@@ -21,223 +22,333 @@
       mainBar = {
         layer = "top";
         position = "top";
-        height = 30;
-        spacing = 4;
         
-        modules-left = [ "hyprland/workspaces" ];
-        modules-center = [ "hyprland/window" ];
-        modules-right = [ "pulseaudio" "network" "cpu" "memory" "battery" "clock" "tray" ];
+        modules-left = [ 
+          "custom/right-arrow-dark"
+          "hyprland/workspaces"
+          "custom/right-arrow-light"
+          "custom/right-arrow-dark"
+          "hyprland/window"
+          "custom/left-arrow-dark"
+          "custom/left-arrow-light"
+        ];
+        
+        modules-center = [
+          "custom/left-arrow-dark"
+          "clock#1"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "clock#2"
+          "custom/right-arrow-dark"
+          "custom/right-arrow-light"
+          "custom/right-arrow-dark"
+          "clock#3"
+          "custom/right-arrow-light"
+        ];
+        
+        modules-right = [ 
+          "custom/left-arrow-dark"
+          "pulseaudio"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "network"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "memory"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "cpu"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "disk"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "tray"
+          "custom/left-arrow-light"
+          "custom/left-arrow-dark"
+          "group/group-power"
+        ];
+        
+        # Custom arrow separators
+        "custom/left-arrow-dark" = {
+          format = "";
+          tooltip = false;
+        };
+        
+        "custom/left-arrow-light" = {
+          format = "";
+          tooltip = false;
+        };
+        
+        "custom/right-arrow-dark" = {
+          format = "";
+          tooltip = false;
+        };
+        
+        "custom/right-arrow-light" = {
+          format = "";
+          tooltip = false;
+        };
         
         # Hyprland workspaces
         "hyprland/workspaces" = {
-          disable-scroll = true;
+          disable-scroll = false;
           all-outputs = true;
-          warp-on-scroll = false;
-          format = "{name}: {icon}";
-          format-icons = {
-            "1" = "";
-            "2" = "";
-            "3" = "";
-            "4" = "";
-            "5" = "";
-            urgent = "";
-            focused = "";
-            default = "";
+          format = "{id}";
+        };
+        
+        # Window title with rewrites
+        "hyprland/window" = {
+          format = "{}";
+          rewrite = {
+            "(.*) — Mozilla Firefox" = " $1";
+            "~/(.*)" = "   [~/$1]";
+            "vim (.*)" = "   [$1]";
+          };
+          max-length = 70;
+          separate-outputs = true;
+        };
+        
+        # Multi-segment clock
+        "clock#1" = {
+          format = "{:%a}";
+          tooltip = false;
+        };
+        
+        "clock#2" = {
+          format = "{:%H:%M}";
+          tooltip-format = "{:%A}";
+        };
+        
+        "clock#3" = {
+          format = "{:%b %d}";
+          tooltip-format = "<tt><small>{calendar}</small></tt>";
+          calendar = {
+            mode = "month";
+            mode-mon-col = 3;
+            weeks-pos = "right";
+            on-scroll = 1;
+            format = {
+              months = "<span color='#ffead3'><b>{}</b></span>";
+              days = "<span color='#ecc6d9'><b>{}</b></span>";
+              weeks = "<span color='#99ffdd'><b>W{}</b></span>";
+              weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+              today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+            };
+          };
+          actions = {
+            on-click-right = "mode";
+            on-click-forward = "tz_up";
+            on-click-backward = "tz_down";
+            on-scroll-up = "shift_up";
+            on-scroll-down = "shift_down";
           };
         };
         
-        # Window title
-        "hyprland/window" = {
-          format = "{}";
+        # Audio
+        pulseaudio = {
+          format = "{icon} {volume}%";
+          format-bluetooth = "{icon}  {volume}%";
+          format-muted = "MUTE";
+          format-icons = {
+            headphones = "";
+            default = [ "" "" ];
+          };
+          scroll-step = 5;
+          on-click = "pulsemixer";
+          on-click-right = "pavucontrol";
         };
         
-        # System tray
-        tray = {
-          spacing = 10;
-        };
-        
-        # Clock
-        clock = {
-          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-          format-alt = "{:%Y-%m-%d}";
+        # Network
+        network = {
+          format = "{ifname}";
+          format-wifi = "{ipaddr}/{cidr} ";
+          format-ethernet = "{ifname} ";
+          format-disconnected = "";
+          tooltip-format = "{ifname} via {gwaddr} 󰊗";
+          tooltip-format-wifi = "{essid} ({signalStrength}%) ";
+          tooltip-format-ethernet = "{ipaddr}/{cidr} 󰊗";
+          tooltip-format-disconnected = "Disconnected 󰌙";
+          max-length = 50;
         };
         
         # CPU usage
         cpu = {
-          format = "{usage}% ";
+          interval = 5;
+          format = "CPU {usage}%";
           tooltip = false;
         };
         
         # Memory usage
         memory = {
-          format = "{}% ";
+          interval = 5;
+          format = "Mem {}%";
         };
         
-        # Battery
-        battery = {
-          states = {
-            warning = 30;
-            critical = 15;
+        # Disk usage
+        disk = {
+          interval = 5;
+          format = "Disk {percentage_used}%";
+          path = "/";
+        };
+        
+        # System tray
+        tray = {
+          icon-size = 20;
+          show-passive-items = true;
+        };
+        
+        # Power menu group with drawer
+        "group/group-power" = {
+          orientation = "inherit";
+          drawer = {
+            transition-duration = 500;
+            children-class = "not-power";
+            transition-left-to-right = true;
           };
-          format = "{capacity}% {icon}";
-          format-charging = "{capacity}% ";
-          format-plugged = "{capacity}% ";
-          format-alt = "{time} {icon}";
-          format-icons = [ "" "" "" "" "" ];
+          modules = [
+            "custom/power"
+            "custom/quit"
+            "custom/lock"
+            "custom/reboot"
+          ];
         };
         
-        # Network
-        network = {
-          format-wifi = "{essid} ({signalStrength}%) ";
-          format-ethernet = "{ipaddr}/{cidr} ";
-          tooltip-format = "{ifname} via {gwaddr} ";
-          format-linked = "{ifname} (No IP) ";
-          format-disconnected = "Disconnected ⚠";
-          format-alt = "{ifname}: {ipaddr}/{cidr}";
+        "custom/quit" = {
+          format = "󰗼 ";
+          tooltip = false;
+          on-click = "hyprctl dispatch exit";
         };
         
-        # Audio
-        pulseaudio = {
-          format = "{volume}% {icon} {format_source}";
-          format-bluetooth = "{volume}% {icon} {format_source}";
-          format-bluetooth-muted = " {icon} {format_source}";
-          format-muted = " {format_source}";
-          format-source = "{volume}% ";
-          format-source-muted = "";
-          format-icons = {
-            headphone = "";
-            hands-free = "";
-            headset = "";
-            phone = "";
-            portable = "";
-            car = "";
-            default = [ "" "" "" ];
-          };
-          on-click = "pavucontrol";
+        "custom/lock" = {
+          format = "󰍁 ";
+          tooltip = false;
+          on-click = "hyprlock";
+        };
+        
+        "custom/reboot" = {
+          format = "󰜉 ";
+          tooltip = false;
+          on-click = "reboot";
+        };
+        
+        "custom/power" = {
+          format = "   ";
+          tooltip = false;
+          on-click = "poweroff";
         };
       };
     };
     
     style = ''
       * {
-        font-family: "JetBrainsMono Nerd Font", monospace;
-        font-size: 13px;
+        font-size: 14px;
+        font-family: "JetBrainsMono NFM", sans-serif;
       }
 
       window#waybar {
-        background-color: rgba(43, 48, 59, 0.9);
-        border-bottom: 3px solid rgba(100, 114, 125, 0.5);
-        color: #ffffff;
-        transition-property: background-color;
-        transition-duration: .5s;
+        background: #292b2e;
+        color: #fdf6e3;
       }
 
-      button {
-        box-shadow: inset 0 -3px transparent;
-        border: none;
-        border-radius: 0;
+      #custom-right-arrow-dark,
+      #custom-left-arrow-dark {
+        color: #1a1a1a;
+      }
+      
+      #custom-right-arrow-light,
+      #custom-left-arrow-light {
+        color: #292b2e;
+        background: #1a1a1a;
       }
 
-      button:hover {
-        background: inherit;
-        box-shadow: inset 0 -3px #ffffff;
+      #workspaces,
+      #clock.1,
+      #clock.2,
+      #clock.3,
+      #pulseaudio,
+      #memory,
+      #cpu,
+      #disk,
+      #tray {
+        background: #1a1a1a;
       }
 
       #workspaces button {
-        padding: 0 5px;
-        background-color: transparent;
-        color: #ffffff;
-      }
-
-      #workspaces button:hover {
-        background: rgba(0, 0, 0, 0.2);
+        padding: 0 2px;
+        color: #fdf6e3;
       }
 
       #workspaces button.active {
-        background-color: #64727D;
-        box-shadow: inset 0 -3px #ffffff;
+        color: #268bd2;
+      }
+
+      #workspaces button:hover {
+        box-shadow: inherit;
+        text-shadow: inherit;
+      }
+
+      #workspaces button.urgent {
+        color: #ff6c6b;
+      }
+
+      #pulseaudio {
+        color: #268bd2;
+      }
+
+      #memory {
+        color: #2aa198;
+      }
+
+      #cpu {
+        color: #6c71c4;
+      }
+
+      #disk {
+        color: #b58900;
+      }
+
+      #clock,
+      #pulseaudio,
+      #memory,
+      #cpu,
+      #disk,
+      #network {
+        padding: 0 10px;
+      }
+      
+      #window {
+        margin-right: 35px;
+        margin-left: 35px;
+        color: #fdf6e3;
+      }
+      
+      #network {
+        color: #859900;
       }
 
       #workspaces button.urgent {
         background-color: #eb4d4b;
       }
 
-      #clock,
-      #battery,
-      #cpu,
-      #memory,
-      #network,
-      #pulseaudio,
-      #tray {
-        padding: 0 10px;
-        color: #ffffff;
-      }
-
-      #window,
-      #workspaces {
-        margin: 0 4px;
-      }
-
-      #clock {
-        background-color: #64727D;
-      }
-
-      #battery {
-        background-color: #ffffff;
-        color: #000000;
-      }
-
-      #battery.charging, #battery.plugged {
-        color: #ffffff;
-        background-color: #26A65B;
-      }
-
-      #battery.critical:not(.charging) {
-        background-color: #f53c3c;
-        color: #ffffff;
-        animation-name: blink;
-        animation-duration: 0.5s;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-      }
-
-      @keyframes blink {
-        to {
-          background-color: #ffffff;
-          color: #000000;
-        }
-      }
-
-      #cpu {
-        background-color: #2ecc71;
-        color: #000000;
-      }
-
-      #memory {
-        background-color: #9b59b6;
-      }
-
-      #network {
-        background-color: #2980b9;
-      }
-
-      #network.disconnected {
-        background-color: #f53c3c;
-      }
-
-      #pulseaudio {
-        background-color: #f1c40f;
-        color: #000000;
-      }
-
-      #pulseaudio.muted {
-        background-color: #90b1b1;
-        color: #2a5c45;
-      }
-
       #tray {
         background-color: #2980b9;
+      }
+      
+      #custom-quit,
+      #custom-lock,
+      #custom-reboot,
+      #custom-power {
+        background: #1a1a1a;
+        color: #fdf6e3;
+        padding: 0 5px;
+      }
+      
+      #custom-quit:hover,
+      #custom-lock:hover,
+      #custom-reboot:hover,
+      #custom-power:hover {
+        color: #dc322f;
       }
     '';
   };

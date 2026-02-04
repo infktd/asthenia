@@ -17,22 +17,23 @@
     enable = true;
     
     settings = {
-      # Preload wallpapers (add your wallpaper paths here)
-      # preload = [
-      #   "~/Pictures/wallpaper.jpg"
-      # ];
-      
-      # Set wallpaper for monitors
-      # Format: wallpaper = "monitor,/path/to/wallpaper"
-      wallpaper = [
-        ",rgba(1e1e2eff)"  # Solid color fallback
-      ];
+      # IPC for runtime wallpaper changes
+      ipc = true;
       
       # Disable splash screen
       splash = false;
       
-      # Enable IPC for runtime wallpaper changes
-      ipc = "on";
+      # Set wallpaper for each monitor using the new block syntax
+      wallpaper = [
+        {
+          monitor = "DP-1";
+          path = "/home/infktd/Wallpaper/pawel-czerwinski-379VdcbeFaQ-unsplash.jpg";
+        }
+        {
+          monitor = "DP-2";
+          path = "/home/infktd/Wallpaper/pawel-czerwinski-379VdcbeFaQ-unsplash.jpg";
+        }
+      ];
     };
   };
 }

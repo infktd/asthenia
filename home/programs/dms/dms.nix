@@ -28,7 +28,7 @@
   ];
 
   programs.dank-material-shell = {
-    enable = false;
+    enable = true;
 
     settings = {
       theme = "dark";

@@ -7,7 +7,7 @@
 # - NVIDIA-optimized environment variables for Wayland
 # - Font and cursor configuration
 # - Audio control utilities
-# - XDG configuration file links for Hyprland and desktop components
+# - XDG configuration file links for Hyprland
 # - Imports for all Hyprland-related program configurations
 #
 # Configuration files are managed in ./config/ directory and linked via XDG,
@@ -84,11 +84,11 @@ in
   # === IMPORTS ===
   imports = [
     ../../shared
-    ../../programs/waybar
-    ../../programs/mako
-    ../../programs/hyprlock
-    ../../programs/hypridle
-    ../../programs/hyprpaper
+    ../../programs/waybar/waybar.nix
+    ../../programs/mako/mako.nix
+    ../../programs/hyprlock/hyprlock.nix
+    ../../programs/hypridle/hypridle.nix
+    ../../programs/hyprpaper/hyprpaper.nix
   ];
 
   # === WAYLAND WINDOW MANAGER ===
@@ -96,7 +96,183 @@ in
     enable = true;
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     xwayland.enable = true;
-    extraConfig = import ./config/hyprland.nix;
+    systemd.enable = true;
+    
+    settings = {
+      # === MONITORS ===
+      monitor = [
+        "DP-1,2560x1440@144,0x1440,1"
+        "DP-2,2560x1440@144,0x0,1"
+      ];
+
+      # === NVIDIA OPTIMIZATIONS ===
+      env = [
+        "LIBVA_DRIVER_NAME,nvidia"
+        "XDG_SESSION_TYPE,wayland"
+        "GBM_BACKEND,nvidia-drm"
+        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+        "WLR_NO_HARDWARE_CURSORS,1"
+      ];
+
+      # === STARTUP ===
+      exec-once = [
+        "waybar"
+        "mako"
+        "hyprpaper"
+        "hypridle"
+      ];
+
+      # === GENERAL ===
+      general = {
+        gaps_in = 5;
+        gaps_out = 10;
+        border_size = 2;
+        "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
+        "col.inactive_border" = "rgba(595959aa)";
+        resize_on_border = false;
+        allow_tearing = false;
+        layout = "dwindle";
+      };
+
+      # === DECORATION ===
+      decoration = {
+        rounding = 10;
+        active_opacity = .95;
+        inactive_opacity = .75;
+        
+        shadow = {
+          enabled = true;
+          range = 4;
+          render_power = 3;
+          color = "rgba(1a1a1aee)";
+        };
+        
+        blur = {
+          enabled = true;
+          size = 3;
+          passes = 1;
+        };
+      };
+
+      # === ANIMATIONS ===
+      animations = {
+        enabled = true;
+        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
+        animation = [
+          "windows, 1, 7, myBezier"
+          "windowsOut, 1, 7, default, popin 80%"
+          "border, 1, 10, default"
+          "borderangle, 1, 8, default"
+          "fade, 1, 7, default"
+          "workspaces, 1, 6, default"
+        ];
+      };
+
+      # === LAYOUT ===
+      dwindle = {
+        pseudotile = true;
+        preserve_split = true;
+      };
+
+      master = {
+        new_on_top = true;
+      };
+
+      # === MISC ===
+      misc = {
+        force_default_wallpaper = -1;
+        disable_hyprland_logo = true;
+      };
+
+      # === INPUT ===
+      input = {
+        kb_layout = "us";
+        follow_mouse = 1;
+        sensitivity = 0;
+      };
+
+      # === KEYBINDINGS ===
+      "$mainMod" = "SUPER";
+      
+      bind = [
+        # Basic window management
+        "$mainMod, ENTER, exec, alacritty"
+        "$mainMod, Q, killactive,"
+        "$mainMod, M, exit,"
+        "$mainMod, E, exec, nemo"
+        "$mainMod, V, togglefloating,"
+        "$mainMod, D, exec, rofi -show drun"
+        "$mainMod, P, pseudo,"
+        "$mainMod, J, togglesplit,"
+
+        # Move focus
+        "$mainMod, left, movefocus, l"
+        "$mainMod, right, movefocus, r"
+        "$mainMod, up, movefocus, u"
+        "$mainMod, down, movefocus, d"
+
+        # Switch workspaces
+        "$mainMod, 1, workspace, 1"
+        "$mainMod, 2, workspace, 2"
+        "$mainMod, 3, workspace, 3"
+        "$mainMod, 4, workspace, 4"
+        "$mainMod, 5, workspace, 5"
+        "$mainMod, 6, workspace, 6"
+        "$mainMod, 7, workspace, 7"
+        "$mainMod, 8, workspace, 8"
+        "$mainMod, 9, workspace, 9"
+        "$mainMod, 0, workspace, 10"
+
+        # Move windows to workspace
+        "$mainMod SHIFT, 1, movetoworkspace, 1"
+        "$mainMod SHIFT, 2, movetoworkspace, 2"
+        "$mainMod SHIFT, 3, movetoworkspace, 3"
+        "$mainMod SHIFT, 4, movetoworkspace, 4"
+        "$mainMod SHIFT, 5, movetoworkspace, 5"
+        "$mainMod SHIFT, 6, movetoworkspace, 6"
+        "$mainMod SHIFT, 7, movetoworkspace, 7"
+        "$mainMod SHIFT, 8, movetoworkspace, 8"
+        "$mainMod SHIFT, 9, movetoworkspace, 9"
+        "$mainMod SHIFT, 0, movetoworkspace, 10"
+
+        # Special workspace
+        "$mainMod, S, togglespecialworkspace, magic"
+        "$mainMod SHIFT, S, movetoworkspace, special:magic"
+
+        # Scroll through workspaces
+        "$mainMod, mouse_down, workspace, e+1"
+        "$mainMod, mouse_up, workspace, e-1"
+
+        # Media keys
+        ", XF86AudioPlay, exec, playerctl play-pause"
+        ", XF86AudioPause, exec, playerctl play-pause"
+        ", XF86AudioNext, exec, playerctl next"
+        ", XF86AudioPrev, exec, playerctl previous"
+
+        # Screenshot
+        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+
+        # Lock screen
+        "$mainMod, L, exec, hyprlock"
+      ];
+
+      binde = [
+        # Volume
+        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+        ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        
+        # Brightness
+        ", XF86MonBrightnessUp, exec, brightnessctl s 10%+"
+        ", XF86MonBrightnessDown, exec, brightnessctl s 10%-"
+      ];
+
+      bindm = [
+        # Move/resize windows with mouse
+        "$mainMod, mouse:272, movewindow"
+        "$mainMod, mouse:273, resizewindow"
+      ];
+    };
   };
 
   # === XDG ===

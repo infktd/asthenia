@@ -20,6 +20,15 @@
 
 {
   # ---------------------------------------------------------------------------
+  # KERNEL MODULE LOADING
+  # ---------------------------------------------------------------------------
+  # Load Nvidia DRM module early for proper Wayland support
+  boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+  
+  # Enable nvidia-drm with modesetting
+  boot.kernelParams = [ "nvidia-drm.modeset=1" ];
+  
+  # ---------------------------------------------------------------------------
   # VIDEO DRIVER CONFIGURATION
   # ---------------------------------------------------------------------------
   # Tells X server and display managers to use NVIDIA drivers

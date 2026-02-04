@@ -40,7 +40,7 @@
 
   # === IMPORTS ===
   imports = [
-    inputs.hyprland.nixosModules.hyprland
+    inputs.hyprland.nixosModules.default
   ];
 
   # === PROGRAMS ===
@@ -65,7 +65,7 @@
     settings = rec {
       tuigreet_session =
         let
-          session = "${inputs.hyprland.packages.${pkgs.system}.hyprland}/bin/Hyprland";
+          session = "${inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland}/bin/Hyprland";
           tuigreet = "${lib.exe pkgs.tuigreet}";
         in
         {
@@ -113,7 +113,7 @@
     enable = true;
     config.common.default = [ "hyprland" "gtk" ];
     extraPortals = with pkgs; [
-      inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland
+      inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland
       xdg-desktop-portal-gtk
     ];
   };
