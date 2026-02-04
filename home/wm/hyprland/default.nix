@@ -97,7 +97,7 @@ in
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     xwayland.enable = true;
     systemd.enable = true;
-    
+
     settings = {
       # === MONITORS ===
       monitor = [
@@ -139,14 +139,14 @@ in
         rounding = 10;
         active_opacity = .95;
         inactive_opacity = .75;
-        
+
         shadow = {
           enabled = true;
           range = 4;
           render_power = 3;
           color = "rgba(1a1a1aee)";
         };
-        
+
         blur = {
           enabled = true;
           size = 3;
@@ -193,15 +193,15 @@ in
 
       # === KEYBINDINGS ===
       "$mainMod" = "SUPER";
-      
+
       bind = [
         # Basic window management
-        "$mainMod, ENTER, exec, alacritty"
+        "$mainMod, RETURN, exec, alacritty"
         "$mainMod, Q, killactive,"
         "$mainMod, M, exit,"
         "$mainMod, E, exec, nemo"
         "$mainMod, V, togglefloating,"
-        "$mainMod, D, exec, rofi -show drun"
+        "$mainMod, D, exec, fuzzel"
         "$mainMod, P, pseudo,"
         "$mainMod, J, togglesplit,"
 
@@ -261,7 +261,7 @@ in
         ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
         ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        
+
         # Brightness
         ", XF86MonBrightnessUp, exec, brightnessctl s 10%+"
         ", XF86MonBrightnessDown, exec, brightnessctl s 10%-"
