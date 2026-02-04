@@ -20,8 +20,8 @@ A modern, modular Nix configuration for both **NixOS** (Linux) and **nix-darwin*
 This configuration implements a complete system setup for both Linux and macOS:
 
 ### Linux (NixOS - `arasaka`)
-- **Window Manager**: Niri (Wayland compositor with scrollable tiling)
-- **Desktop Environment**: DMS (Dank Material Shell) for system monitoring and widgets
+- **Window Managers**: Niri (Wayland compositor with scrollable tiling, default) or Hyprland (modern Wayland compositor)
+- **Desktop Environment**: DMS (Dank Material Shell) for Niri, waybar for Hyprland
 - **Hardware Support**: NVIDIA GPU optimization for Wayland
 
 ### macOS (nix-darwin - `esoteric`)
@@ -386,9 +386,14 @@ The configuration provides multiple Home Manager profiles:
    home-manager switch --flake .#default
    ```
 
-2. **`niri`**: Full Niri window manager configuration (recommended)
+2. **`niri`**: Full Niri window manager configuration (default)
    ```bash
    home-manager switch --flake .#niri
+   ```
+
+3. **`hyprland`**: Full Hyprland window manager configuration
+   ```bash
+   home-manager switch --flake .#hyprland
    ```
 
 #### macOS
@@ -401,6 +406,50 @@ The configuration provides multiple Home Manager profiles:
    ```bash
    home-manager switch --flake .#aerospace
    ```
+
+### Window Manager Switching
+
+This configuration supports multiple window managers on Linux. Switch between them using a two-step process:
+
+#### Available Window Managers
+
+- **Niri**: Scrollable tiling Wayland compositor with DMS (Dank Material Shell)
+- **Hyprland**: Modern Wayland compositor with waybar and minimal setup
+
+#### Switching Process
+
+**1. Change System Configuration**
+
+Edit [system/machine/arasaka/default.nix](system/machine/arasaka/default.nix) and update the WM import:
+
+```nix
+imports = [
+  ./hardware-configuration.nix
+  ./nvidia.nix
+  ../../wm/niri.nix        # Change this line
+  # ../../wm/hyprland.nix  # To this line
+];
+```
+
+**2. Apply Changes**
+
+```bash
+# Rebuild system with new window manager
+sudo nixos-rebuild switch --flake .#arasaka
+
+# Switch to corresponding home-manager profile
+home-manager switch --flake .#niri      # or .#hyprland
+
+# Reboot to ensure clean session
+systemctl reboot
+```
+
+#### Profile Mapping
+
+| System Import | Home-Manager Profile | Description |
+|---------------|---------------------|-------------|
+| `../../wm/niri.nix` | `.#niri` | Niri + DMS |
+| `../../wm/hyprland.nix` | `.#hyprland` | Hyprland + waybar |
 
 ### Testing Changes
 

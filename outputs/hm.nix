@@ -233,8 +233,9 @@ else
     mods = [ ../home/wm/niri ];
   };
 
-  # ---------------------------------------------------------------------------
-  # ADDING NEW LINUX PROFILES
+      hyprland = mkProfile {
+        mods = [ ../home/wm/hyprland ];
+      };
   # ---------------------------------------------------------------------------
   # To create a new Linux profile:
   #

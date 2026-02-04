@@ -84,6 +84,13 @@
     dms = {
       url = "github:AvengeMedia/DankMaterialShell";
     };
+
+    # Hyprland - modern Wayland compositor
+    # Provides NixOS module and packages for system integration
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     
     # --- Application Inputs ---
 
