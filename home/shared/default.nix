@@ -78,6 +78,7 @@
     nodejs # Node.js runtime
     opencode # Opensource code editor
     python3 # Python interpreter
+    bun # JavaScript runtime
 
     # --- Secrets Management ---
     age # Modern encryption tool for secrets

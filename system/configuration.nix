@@ -16,6 +16,12 @@ in
   boot.kernelParams = [ "processor.max_cstate=1" ];
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
+  
+  # Increase inotify limits for file watchers (editors like Zed, VSCode)
+  boot.kernel.sysctl = {
+    "fs.inotify.max_user_watches" = 524288;
+    "fs.inotify.max_user_instances" = 524288;
+  };
 
   # === ENVIRONMENT ===
   environment.systemPackages = with pkgs; [

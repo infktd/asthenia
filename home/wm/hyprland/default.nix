@@ -96,10 +96,17 @@ in
     enable = true;
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     xwayland.enable = true;
-    systemd.enable = true;
+    # CRITICAL: Disable systemd integration to prevent Hyprland from restarting
+    # during NixOS rebuilds. This is the key difference from Niri which doesn't
+    # have this issue - Niri uses niri-session which handles systemd properly.
+    # With systemd.enable = true, Hyprland's systemd user services restart on
+    # every system update, causing video loss and monitor reconfiguration.
+    systemd.enable = false;
 
     settings = {
       # === MONITORS ===
+      # Fixed monitor configuration - won't change during rebuilds since
+      # systemd integration is disabled above
       monitor = [
         "DP-1,2560x1440@144,0x1440,1"
         "DP-2,2560x1440@144,0x0,1"

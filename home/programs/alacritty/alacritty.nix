@@ -47,7 +47,7 @@
       # FONT
       # -----------------------------------------------------------------------
       font = {
-        size = 14.0;
+        size = 10.0;
 
         normal = {
           family = "JetBrainsMono Nerd Font";
@@ -79,7 +79,7 @@
       cursor = {
         style = {
           shape = "Block";
-          blinking = "Off";
+          blinking = "On";
         };
       };
 

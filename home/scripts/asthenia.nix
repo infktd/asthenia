@@ -16,7 +16,7 @@ writeShellScriptBin "asthenia" ''
       Linux)
         PLATFORM="linux"
         HOSTNAME="arasaka"
-        DEFAULT_HM_PROFILE="niri"
+        DEFAULT_HM_PROFILE="hyprland"
         ;;
       *)
         echo "Error: Unsupported platform $(uname -s)"
