@@ -144,8 +144,8 @@ in
       # === DECORATION ===
       decoration = {
         rounding = 10;
-        active_opacity = .95;
-        inactive_opacity = .75;
+        active_opacity = 1.0;
+        inactive_opacity = .95;
 
         shadow = {
           enabled = true;
