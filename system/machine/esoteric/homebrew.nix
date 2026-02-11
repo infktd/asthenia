@@ -42,7 +42,7 @@
       # - "zap": Remove unlisted packages and their configs
       # Start with "none" to avoid removing existing packages
       # Change to "uninstall" once you've added all your packages
-      cleanup = "none";
+      cleanup = "uninstall";
 
       # Upgrade packages during darwin-rebuild
       upgrade = true;
