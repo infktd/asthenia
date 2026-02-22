@@ -257,7 +257,8 @@ in
         ", XF86AudioPrev, exec, playerctl previous"
 
         # Screenshot
-        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+        "$mainMod, X, exec, grim -g \"$(slurp)\" - | wl-copy"
+        "$mainMod SHIFT, X, exec, grim -g \"$(slurp)\" ~/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png"
 
         # Lock screen
         "$mainMod, L, exec, hyprlock"
