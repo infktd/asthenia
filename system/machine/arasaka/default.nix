@@ -5,7 +5,7 @@
   imports = [
     ./hardware-configuration.nix
     ./nvidia.nix
-    ../../wm/niri.nix
+    ../../wm/hyprland.nix
   ];
 
   # === NETWORKING ===
