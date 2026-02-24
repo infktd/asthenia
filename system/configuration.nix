@@ -26,7 +26,6 @@ in
   # === ENVIRONMENT ===
   environment.systemPackages = with pkgs; [
     curl
-    devcontainer
     devenv
     dive
     docker
@@ -108,6 +107,18 @@ in
 
   # === SERVICES ===
   services.avahi.enable = true;
+  services.ollama = {
+    enable = true;
+    # Use CUDA-enabled package for GPU acceleration
+    package = pkgs.ollama-cuda;
+    # Optional: specify which GPU to use (defaults to all available)
+    # environmentVariables = {
+    #   CUDA_VISIBLE_DEVICES = "0";
+    # };
+    # Optional: configure listening address (default is localhost only)
+    # host = "0.0.0.0";  # Allow network access
+    # port = 11434;      # Default port
+  };
   services.openssh = {
     enable = true;
     settings = {

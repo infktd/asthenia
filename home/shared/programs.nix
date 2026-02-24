@@ -43,6 +43,7 @@ let
     ../programs/git/git.nix        # Git version control with user identity
     ../programs/vscode/vscode.nix  # VS Code editor with extensions
     ../programs/zed-editor/zed-editor.nix  # Zed editor
+    ../programs/crush/crush.nix      # Crush AI assistant with Ollama integration
 
     # --- Shell and Terminal ---
     ../programs/alacritty/alacritty.nix  # GPU-accelerated terminal
