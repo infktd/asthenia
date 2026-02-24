@@ -45,6 +45,7 @@ let
   packages = with pkgs; [
     # --- Window Management ---
     aerospace  # Tiling window manager for macOS
+    stripe-cli
   ] ++ fontPkgs;
 
 in

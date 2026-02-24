@@ -60,7 +60,7 @@
     # BREWS
     # ---------------------------------------------------------------------------
     # CLI tools installed via Homebrew (prefer Nix when possible)
-    brews = [
+    brews = [ "libomp"
       # Add CLI tools that don't work well with Nix on macOS
       # Example: "mas"  # Mac App Store CLI
     ];
@@ -74,7 +74,7 @@
     # Currently empty - all apps managed by Nix/home-manager
     # Add casks here only if absolutely necessary (e.g., apps requiring
     # deep macOS integration not available in nixpkgs)
-    casks = [
+    casks = [ "temurin@11"
     ];
 
     # ---------------------------------------------------------------------------
