@@ -112,7 +112,7 @@
     # --- System Utilities (Linux-specific) ---
     vulkan-tools # Vulkan utilities (vulkaninfo, etc.)
     xdg-utils # Utilities for managing XDG directories and MIME types
-    xorg.xhost # X11 access control (needed for some apps)
+    xhost # X11 access control (needed for some apps)
   ];
 
   packages =
