@@ -171,21 +171,12 @@ in
   };
 
   # # === VIRTUALISATION ===
-  # virtualisation.containers.enable = true;
-  # virtualisation.podman = {
-  #   defaultNetwork.settings.dns_enabled = true;
-  #   dockerCompat = true;
-  #   dockerSocket.enable = true;
-  #   enable = true;
-  # };
-  # === VIRTUALISATION ===
-  virtualisation.docker = {
+  virtualisation.containers.enable = true;
+  virtualisation.podman = {
+    defaultNetwork.settings.dns_enabled = true;
+    dockerCompat = true;
+    dockerSocket.enable = true;
     enable = true;
-    enableOnBoot = true;
-    autoPrune.enable = true;
-    rootless = {
-      enable = true;  # Make sure rootless is disabled
-    };
   };
 
 

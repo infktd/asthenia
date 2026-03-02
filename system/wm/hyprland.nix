@@ -65,7 +65,7 @@
     settings = rec {
       tuigreet_session =
         let
-          session = "${inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland}/bin/Hyprland";
+          session = "${inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland}/bin/start-hyprland";
           tuigreet = "${lib.exe pkgs.tuigreet}";
         in
         {
