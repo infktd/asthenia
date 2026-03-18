@@ -13,7 +13,7 @@ in
 {
   # === BOOT ===
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = [ "processor.max_cstate=1" ];
+  boot.kernelParams = [ "processor.max_cstate=1" "nokaslr" ];
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
 
