@@ -1,42 +1,12 @@
-# =============================================================================
-# ASTHENIA FLAKE CONFIGURATION
-# =============================================================================
-# This is the main entry point for the entire system configuration.
-#
-# FLAKE STRUCTURE:
-# - inputs: External dependencies (nixpkgs, home-manager, window managers, etc.)
-# - outputs: Generated configurations (NixOS systems, Darwin systems, Home Manager profiles)
-#
-# KEY ARCHITECTURAL DECISIONS:
-# 1. Standalone Home Manager: User configs are independent of system configs
-# 2. Overlay-based builders: Custom builder functions injected via overlays
-# 3. Flake schemas: Enhanced documentation and validation
-# 4. Modular inputs: Each feature (niri, dms) has its own input
-# 5. Multi-platform: Supports both NixOS (x86_64-linux) and nix-darwin (aarch64-darwin)
-#
-# USAGE:
-# - NixOS System: sudo nixos-rebuild switch --flake .#arasaka
-# - Darwin System: darwin-rebuild switch --flake .#esoteric
-# - Home Manager (Linux): home-manager switch --flake .#niri
-# - Home Manager (macOS): home-manager switch --flake .#aerospace
-# - Build test: nix build .#nixosConfigurations.arasaka.config.system.build.toplevel
-# =============================================================================
 {
-  description = "NixOS Configuration with Home Manager";
+  description = "Asthenia - NixOS & Darwin Configuration";
 
-  # =============================================================================
-  # BINARY CACHE CONFIGURATION
-  # =============================================================================
-  # Pre-built binaries significantly speed up rebuilds by avoiding compilation
-  # These settings configure which binary caches to use and trust
   nixConfig = {
-    # Binary cache servers to fetch pre-built packages from
     extra-substituters = [
       "https://cache.nixos.org"
-      "https://claude-code.cachix.org"  # Pre-built claude-code binaries
-      "https://hyprland.cachix.org"     # Pre-built Hyprland binaries
+      "https://claude-code.cachix.org"
+      "https://hyprland.cachix.org"
     ];
-    # Public keys for verifying downloaded binaries
     extra-trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
@@ -44,188 +14,85 @@
     ];
   };
 
-  # =============================================================================
-  # FLAKE INPUTS
-  # =============================================================================
-  # External dependencies that this flake depends on
-  # Each input is pinned to a specific revision for reproducibility
   inputs = {
-    # --- Core System Inputs ---
-    
-    # NixOS packages repository (unstable channel for latest packages)
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    # Home Manager - manages user-level configurations and dotfiles
-    # Follows nixpkgs to ensure package version compatibility
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # nix-darwin - macOS system configuration management
-    # Follows nixpkgs to ensure package version compatibility
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Flake schemas - provides enhanced documentation and structure validation
+    home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };
+    nix-darwin = { url = "github:LnL7/nix-darwin"; inputs.nixpkgs.follows = "nixpkgs"; };
     flake-schemas.url = "github:DeterminateSystems/flake-schemas";
-
-    # --- Window Manager and Desktop Environment ---
-    
-    # Niri - scrollable-tiling Wayland compositor
-    # Provides both NixOS module and overlay for system integration
-    niri-flake = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # DMS (Dank Material Shell) - system monitoring and widget framework
-    # Provides both NixOS and Home Manager modules for dual-level config
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell";
-    };
-
-    # Hyprland - modern Wayland compositor
-    # Provides NixOS module and packages for system integration
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    
-    # --- Application Inputs ---
-
-    # nixcord - Discord client with custom themes and plugins
-    nixcord = {
-      url = "github:kaylorben/nixcord";
-    };
-
-    # sops-nix - Secrets management with age encryption
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # claude-code-nix - Always up-to-date Claude Code with native binary support
-    claude-code = {
-      url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
+    niri-flake = { url = "github:sodiboo/niri-flake"; inputs.nixpkgs.follows = "nixpkgs"; };
+    dms = { url = "github:AvengeMedia/DankMaterialShell"; };
+    hyprland = { url = "github:hyprwm/Hyprland"; inputs.nixpkgs.follows = "nixpkgs"; };
+    nixcord = { url = "github:kaylorben/nixcord"; };
+    sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
+    claude-code = { url = "github:sadjow/claude-code-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
   };
 
-  # =============================================================================
-  # FLAKE OUTPUTS
-  # =============================================================================
-  # The actual configurations generated by this flake
-  # Each output type serves a different purpose in the Nix ecosystem
   outputs = inputs @ { self, nixpkgs, home-manager, nix-darwin, flake-schemas, ... }:
     let
-      # ---------------------------------------------------------------------------
-      # SYSTEM ARCHITECTURES
-      # ---------------------------------------------------------------------------
-      # Define target systems for each platform
-      # - linuxSystem: NixOS machines (arasaka)
-      # - darwinSystem: macOS machines (esoteric)
-      linuxSystem = "x86_64-linux";
-      darwinSystem = "aarch64-darwin";
-
-      # ---------------------------------------------------------------------------
-      # OVERLAY SYSTEM
-      # ---------------------------------------------------------------------------
-      # Overlays extend nixpkgs with custom packages and modifications
-      # Our overlays add builder functions that create configs programmatically
-      # See lib/overlays.nix for implementation details
-      #
-      # Note: Overlays are system-agnostic; system-specific builders handle arch
-      linuxOverlays = import ./lib/overlays.nix { inherit inputs; system = linuxSystem; };
-      darwinOverlays = import ./lib/overlays.nix { inherit inputs; system = darwinSystem; };
-
-      # ---------------------------------------------------------------------------
-      # PACKAGE SET CONFIGURATION
-      # ---------------------------------------------------------------------------
-      # Create customized nixpkgs instances with:
-      # 1. Our custom overlays (adds builder functions)
-      # 2. System architecture specification
-      # 3. Unfree packages enabled (needed for proprietary software)
-      #
-      # Separate package sets for Linux and Darwin to ensure correct binaries
-      linuxPkgs = import nixpkgs {
-        overlays = linuxOverlays;
-        system = linuxSystem;
-        config = {
-          allowUnfree = true;  # Required for NVIDIA drivers, Discord, etc.
-        };
+      mkPkgs = system: import nixpkgs {
+        inherit system;
+        overlays = [
+          inputs.niri-flake.overlays.niri
+          inputs.claude-code.overlays.default
+          (final: prev: {
+            lib = (prev.lib.extend (_: _: {
+              exe = pkg: "${prev.lib.getBin pkg}/bin/${pkg.pname or pkg.name}";
+            })).extend (import "${nixpkgs}/lib/flake-version-info.nix" nixpkgs);
+          })
+        ];
+        config.allowUnfree = true;
       };
 
-      darwinPkgs = import nixpkgs {
-        overlays = darwinOverlays;
-        system = darwinSystem;
-        config = {
-          allowUnfree = true;  # Required for proprietary software
+      linuxPkgs = mkPkgs "x86_64-linux";
+      darwinPkgs = mkPkgs "aarch64-darwin";
+
+      mkHome = { pkgs, isDarwin ? false, modules }:
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            { nix.registry.nixpkgs.flake = nixpkgs; }
+            inputs.sops-nix.homeManagerModules.sops
+          ] ++ modules;
+          extraSpecialArgs = { inherit inputs isDarwin; };
         };
-      };
     in
     {
-      # ---------------------------------------------------------------------------
-      # HOME MANAGER CONFIGURATIONS
-      # ---------------------------------------------------------------------------
-      # User-level configurations (dotfiles, programs, themes)
-      # Built and activated independently from system configs
-      #
-      # Available profiles:
-      # - default: Basic user config without window manager (Linux)
-      # - niri: Full desktop environment with Niri WM (Linux)
-      # - default-darwin: Basic user config for macOS
-      # - aerospace: Full desktop environment with Aerospace WM (macOS)
-      #
-      # Build: nix build .#homeConfigurations.<name>.activationPackage
-      # Switch: home-manager switch --flake .#<name>
-      homeConfigurations =
-        linuxPkgs.builders.mkHome { } //
-        darwinPkgs.builders.mkHomeDarwin { };
-
-      # ---------------------------------------------------------------------------
-      # NIXOS SYSTEM CONFIGURATIONS
-      # ---------------------------------------------------------------------------
-      # System-level configurations for Linux machines
-      # One configuration per machine (currently just "arasaka")
-      #
-      # Build: nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel
-      # Switch: sudo nixos-rebuild switch --flake .#<hostname>
-      # Test: sudo nixos-rebuild test --flake .#<hostname>
-      nixosConfigurations = linuxPkgs.builders.mkNixos { };
-
-      # ---------------------------------------------------------------------------
-      # DARWIN SYSTEM CONFIGURATIONS
-      # ---------------------------------------------------------------------------
-      # System-level configurations for macOS machines
-      # One configuration per machine (currently just "esoteric")
-      #
-      # Build: nix build .#darwinConfigurations.<hostname>.system
-      # Switch: darwin-rebuild switch --flake .#<hostname>
-      darwinConfigurations = darwinPkgs.builders.mkDarwin { };
-
-      # ---------------------------------------------------------------------------
-      # CUSTOM EXPORTS
-      # ---------------------------------------------------------------------------
-      # Export pkgs and overlays for use by other flakes or tools
-      # This allows external consumers to use our custom packages and functions
-      out = {
-        pkgs = linuxPkgs;
-        pkgsDarwin = darwinPkgs;
-        overlays = linuxOverlays;
+      homeConfigurations = {
+        default        = mkHome { pkgs = linuxPkgs;  modules = [ ./home ]; };
+        niri           = mkHome { pkgs = linuxPkgs;  modules = [ ./home ./home/desktop/niri ]; };
+        hyprland       = mkHome { pkgs = linuxPkgs;  modules = [ ./home ./home/desktop/hyprland.nix ]; };
+        default-darwin = mkHome { pkgs = darwinPkgs; isDarwin = true; modules = [ ./home ]; };
+        aerospace      = mkHome { pkgs = darwinPkgs; isDarwin = true; modules = [ ./home ./home/desktop/aerospace ]; };
       };
 
-      # ---------------------------------------------------------------------------
-      # FLAKE SCHEMAS
-      # ---------------------------------------------------------------------------
-      # Metadata describing the structure of this flake's outputs
-      # Improves documentation and enables better tooling integration
-      # Merges standard schemas with our custom schema definitions
-      schemas =
-        flake-schemas.schemas //
-        import ./lib/schemas.nix { inherit (inputs) flake-schemas; };
+      nixosConfigurations.arasaka = nixpkgs.lib.nixosSystem {
+        inherit (linuxPkgs) lib;
+        pkgs = linuxPkgs;
+        system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          inputs.sops-nix.nixosModules.sops
+          { nix.registry.nixpkgs.flake = nixpkgs; }
+          ./machines/arasaka/hardware-configuration.nix
+          ./nixos/base.nix
+          ./nixos/nvidia.nix
+          ./nixos/gaming.nix
+          ./nixos/niri.nix
+          { networking.hostName = "arasaka"; }
+        ];
+      };
+
+      darwinConfigurations.esoteric = nix-darwin.lib.darwinSystem {
+        inherit (darwinPkgs) lib;
+        pkgs = darwinPkgs;
+        specialArgs = { inherit inputs; };
+        modules = [
+          { nix.registry.nixpkgs.flake = nixpkgs; }
+          ./darwin.nix
+          { networking = { computerName = "esoteric"; hostName = "esoteric"; localHostName = "esoteric"; }; }
+        ];
+      };
+
+      schemas = flake-schemas.schemas;
     };
 }
