@@ -1,7 +1,7 @@
 // Primary monitor (top)
-output "DP-1" {
+output "DP-2" {
     mode "2560x1440@144.002"
-    scale 1
+    scale AGE-SECRET-KEY-1REPLACE_WITH_YOUR_ACTUAL_SECRET_KEY1
     transform "normal"
     position x=0 y=1440
 
@@ -17,15 +17,15 @@ output "DP-1" {
 
     layout {
         // ...layout settings for eDP-1...
-    }   
+    }
 
 
 
-    
+
 }
 
 // Secondary monitor (bottom)
-output "DP-2" {
+output "DP-3" {
     mode "2560x1440@144.002"
     scale 1
     transform "normal"
