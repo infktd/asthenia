@@ -1,7 +1,7 @@
 // Primary monitor (top)
-output "DP-2" {
+output "HDMI-A-1" {
     mode "2560x1440@144.002"
-    scale AGE-SECRET-KEY-1REPLACE_WITH_YOUR_ACTUAL_SECRET_KEY1
+    scale 1
     transform "normal"
     position x=0 y=1440
 
@@ -25,7 +25,7 @@ output "DP-2" {
 }
 
 // Secondary monitor (bottom)
-output "DP-3" {
+output "DP-2" {
     mode "2560x1440@144.002"
     scale 1
     transform "normal"
